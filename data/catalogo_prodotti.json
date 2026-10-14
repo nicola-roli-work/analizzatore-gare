@@ -1,0 +1,1273 @@
+{
+ "_nota": "CATALOGO DI ESEMPIO generico e fittizio: sostituirlo con il catalogo reale mantenendo lo stesso formato. Campi: t=nome, b=marca, sc=sotto-categoria, a=area tematica, p=prezzo EUR, l=link relativo (opzionale, concatenato a base_url). mappa_sotto_categorie e' opzionale: {\"nome generico\": [\"sotto-categoria del catalogo\", ...]}.",
+ "generato_il": "2026-10-14T09:56:13",
+ "totale": 158,
+ "base_url": "",
+ "mappa_sotto_categorie": {},
+ "prodotti": [
+  {
+   "t": "Notebook 15,6\" FHD, Core i5, 16 GB RAM, 512 GB SSD, Windows 11 Pro",
+   "b": "HP",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 749.0,
+   "l": ""
+  },
+  {
+   "t": "Notebook 14\" FHD, Ryzen 5, 8 GB RAM, 256 GB SSD, Windows 11 Pro",
+   "b": "Lenovo",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 589.0,
+   "l": ""
+  },
+  {
+   "t": "Notebook 15,6\" FHD, Core i7, 16 GB RAM, 1 TB SSD, Windows 11 Pro",
+   "b": "Dell",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 1049.0,
+   "l": ""
+  },
+  {
+   "t": "Chromebook 14\" HD, 8 GB RAM, 128 GB eMMC, ChromeOS",
+   "b": "Acer",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 329.0,
+   "l": ""
+  },
+  {
+   "t": "Chromebook 11,6\" rugged convertibile, 4 GB RAM, 64 GB",
+   "b": "Lenovo",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 289.0,
+   "l": ""
+  },
+  {
+   "t": "Notebook 13,3\" ultraleggero, Core i5, 16 GB RAM, 512 GB SSD",
+   "b": "Asus",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 899.0,
+   "l": ""
+  },
+  {
+   "t": "Notebook 15,6\" didattico, Celeron, 8 GB RAM, 256 GB SSD, Windows 11 Pro Education",
+   "b": "Acer",
+   "sc": "Notebook e portatili",
+   "a": "Tecnologia",
+   "p": 429.0,
+   "l": ""
+  },
+  {
+   "t": "PC desktop SFF, Core i5, 16 GB RAM, 512 GB SSD, Windows 11 Pro",
+   "b": "HP",
+   "sc": "Desktop e workstation",
+   "a": "Tecnologia",
+   "p": 659.0,
+   "l": ""
+  },
+  {
+   "t": "PC desktop tower, Core i7, 32 GB RAM, 1 TB SSD, Windows 11 Pro",
+   "b": "Lenovo",
+   "sc": "Desktop e workstation",
+   "a": "Tecnologia",
+   "p": 1099.0,
+   "l": ""
+  },
+  {
+   "t": "Mini PC, Core i3, 8 GB RAM, 256 GB SSD, Windows 11 Pro",
+   "b": "Dell",
+   "sc": "Desktop e workstation",
+   "a": "Tecnologia",
+   "p": 489.0,
+   "l": ""
+  },
+  {
+   "t": "Workstation tower, Xeon, 64 GB RAM, 2 TB SSD, scheda grafica professionale",
+   "b": "HP",
+   "sc": "Desktop e workstation",
+   "a": "Tecnologia",
+   "p": 2890.0,
+   "l": ""
+  },
+  {
+   "t": "All-in-one 23,8\" FHD, Core i5, 16 GB RAM, 512 GB SSD",
+   "b": "Lenovo",
+   "sc": "Desktop e workstation",
+   "a": "Tecnologia",
+   "p": 899.0,
+   "l": ""
+  },
+  {
+   "t": "Thin client per laboratorio, 8 GB RAM, 128 GB",
+   "b": "Dell",
+   "sc": "Desktop e workstation",
+   "a": "Tecnologia",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Tablet 10,9\" Wi-Fi 64 GB",
+   "b": "Apple",
+   "sc": "Tablet",
+   "a": "Tecnologia",
+   "p": 409.0,
+   "l": ""
+  },
+  {
+   "t": "Tablet 11\" Wi-Fi 128 GB Android",
+   "b": "Samsung",
+   "sc": "Tablet",
+   "a": "Tecnologia",
+   "p": 379.0,
+   "l": ""
+  },
+  {
+   "t": "Tablet 10,1\" Wi-Fi 64 GB Android con custodia",
+   "b": "Lenovo",
+   "sc": "Tablet",
+   "a": "Tecnologia",
+   "p": 219.0,
+   "l": ""
+  },
+  {
+   "t": "Tablet 2-in-1 Windows 11 Pro 12,3\" con tastiera",
+   "b": "Microsoft",
+   "sc": "Tablet",
+   "a": "Tecnologia",
+   "p": 1099.0,
+   "l": ""
+  },
+  {
+   "t": "Custodia rugged con maniglia per tablet 10\"",
+   "b": "Generico",
+   "sc": "Tablet",
+   "a": "Tecnologia",
+   "p": 29.9,
+   "l": ""
+  },
+  {
+   "t": "Monitor 23,8\" IPS FHD, HDMI/DisplayPort, regolabile in altezza",
+   "b": "Dell",
+   "sc": "Monitor e display",
+   "a": "Tecnologia",
+   "p": 169.0,
+   "l": ""
+  },
+  {
+   "t": "Monitor 27\" IPS QHD, USB-C 65 W",
+   "b": "LG",
+   "sc": "Monitor e display",
+   "a": "Tecnologia",
+   "p": 299.0,
+   "l": ""
+  },
+  {
+   "t": "Monitor 21,5\" FHD VA, HDMI/VGA",
+   "b": "Philips",
+   "sc": "Monitor e display",
+   "a": "Tecnologia",
+   "p": 109.0,
+   "l": ""
+  },
+  {
+   "t": "Monitor 32\" 4K IPS, HDR",
+   "b": "Samsung",
+   "sc": "Monitor e display",
+   "a": "Tecnologia",
+   "p": 389.0,
+   "l": ""
+  },
+  {
+   "t": "Display professionale 55\" 4K per segnaletica digitale, 16/7",
+   "b": "LG",
+   "sc": "Monitor e display",
+   "a": "Tecnologia",
+   "p": 749.0,
+   "l": ""
+  },
+  {
+   "t": "Display professionale 65\" 4K con lettore multimediale integrato",
+   "b": "Samsung",
+   "sc": "Monitor e display",
+   "a": "Tecnologia",
+   "p": 1190.0,
+   "l": ""
+  },
+  {
+   "t": "Stampante laser monocromatica A4, 40 ppm, fronte/retro, rete",
+   "b": "Brother",
+   "sc": "Stampanti e scanner",
+   "a": "Tecnologia",
+   "p": 229.0,
+   "l": ""
+  },
+  {
+   "t": "Multifunzione laser a colori A4, 25 ppm, fronte/retro, ADF",
+   "b": "HP",
+   "sc": "Stampanti e scanner",
+   "a": "Tecnologia",
+   "p": 449.0,
+   "l": ""
+  },
+  {
+   "t": "Multifunzione inkjet A3 a colori, serbatoi ricaricabili",
+   "b": "Epson",
+   "sc": "Stampanti e scanner",
+   "a": "Tecnologia",
+   "p": 519.0,
+   "l": ""
+  },
+  {
+   "t": "Scanner documentale A4, 40 ppm, ADF 50 fogli, fronte/retro",
+   "b": "Canon",
+   "sc": "Stampanti e scanner",
+   "a": "Tecnologia",
+   "p": 379.0,
+   "l": ""
+  },
+  {
+   "t": "Scanner piano A4 per libri, 2400 dpi",
+   "b": "Epson",
+   "sc": "Stampanti e scanner",
+   "a": "Tecnologia",
+   "p": 139.0,
+   "l": ""
+  },
+  {
+   "t": "Multifunzione laser mono A4 compatta, Wi-Fi",
+   "b": "Brother",
+   "sc": "Stampanti e scanner",
+   "a": "Tecnologia",
+   "p": 189.0,
+   "l": ""
+  },
+  {
+   "t": "Monitor interattivo touch 65\" 4K, Android integrato, 20 tocchi",
+   "b": "BenQ",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 1690.0,
+   "l": ""
+  },
+  {
+   "t": "Monitor interattivo touch 75\" 4K, Android integrato, penna attiva",
+   "b": "Promethean",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 2390.0,
+   "l": ""
+  },
+  {
+   "t": "Monitor interattivo touch 86\" 4K con slot OPS",
+   "b": "SMART",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 3490.0,
+   "l": ""
+  },
+  {
+   "t": "Videoproiettore laser 4.000 lumen WXGA, ottica corta",
+   "b": "Epson",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 890.0,
+   "l": ""
+  },
+  {
+   "t": "Videoproiettore 3.600 lumen FHD, HDMI",
+   "b": "Optoma",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 549.0,
+   "l": ""
+  },
+  {
+   "t": "Modulo OPS Core i5, 8 GB RAM, 256 GB SSD, Windows 11 Pro",
+   "b": "Generico",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 549.0,
+   "l": ""
+  },
+  {
+   "t": "Supporto a parete per monitor interattivi 65-86\"",
+   "b": "Generico",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Carrello mobile motorizzato per monitor interattivi fino a 86\"",
+   "b": "Generico",
+   "sc": "Proiettori e lavagne interattive",
+   "a": "Tecnologia",
+   "p": 690.0,
+   "l": ""
+  },
+  {
+   "t": "Cuffie con microfono USB, padiglione chiuso, per laboratorio linguistico",
+   "b": "Logitech",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 34.9,
+   "l": ""
+  },
+  {
+   "t": "Cuffie wireless con microfono a cancellazione del rumore",
+   "b": "Jabra",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 189.0,
+   "l": ""
+  },
+  {
+   "t": "Barra video all-in-one 4K per sale fino a 10 persone",
+   "b": "Poly",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 1290.0,
+   "l": ""
+  },
+  {
+   "t": "Speakerphone USB/Bluetooth",
+   "b": "Jabra",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 179.0,
+   "l": ""
+  },
+  {
+   "t": "Diffusore amplificato 2 vie 200 W con microfono wireless",
+   "b": "Yamaha",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 429.0,
+   "l": ""
+  },
+  {
+   "t": "Sistema audio per aula: 2 diffusori a parete + amplificatore",
+   "b": "Generico",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Microfono a condensatore USB per podcast",
+   "b": "Generico",
+   "sc": "Cuffie audio e videoconferenza",
+   "a": "Tecnologia",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Kit tastiera + mouse wireless, layout italiano",
+   "b": "Logitech",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 29.9,
+   "l": ""
+  },
+  {
+   "t": "Mouse ottico USB",
+   "b": "Logitech",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 9.9,
+   "l": ""
+  },
+  {
+   "t": "Tastiera USB layout italiano",
+   "b": "HP",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 14.9,
+   "l": ""
+  },
+  {
+   "t": "Docking station USB-C, doppio monitor, 100 W",
+   "b": "Dell",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 189.0,
+   "l": ""
+  },
+  {
+   "t": "Hub USB-C 7 in 1",
+   "b": "Generico",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 39.9,
+   "l": ""
+  },
+  {
+   "t": "Tavoletta grafica con penna, formato medio",
+   "b": "Wacom",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 219.0,
+   "l": ""
+  },
+  {
+   "t": "Webcam-document camera / visualizzatore USB 8 MP",
+   "b": "Generico",
+   "sc": "Tastiere mouse e periferiche",
+   "a": "Tecnologia",
+   "p": 159.0,
+   "l": ""
+  },
+  {
+   "t": "Access point Wi-Fi 6 dual band, PoE, gestione cloud",
+   "b": "Ubiquiti",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 169.0,
+   "l": ""
+  },
+  {
+   "t": "Switch gestito 24 porte Gigabit PoE+ 370 W",
+   "b": "Cisco",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 890.0,
+   "l": ""
+  },
+  {
+   "t": "Switch 8 porte Gigabit non gestito",
+   "b": "TP-Link",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 29.9,
+   "l": ""
+  },
+  {
+   "t": "Router/firewall per piccole reti",
+   "b": "Ubiquiti",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Armadio rack 19\" 12U a parete",
+   "b": "Generico",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 169.0,
+   "l": ""
+  },
+  {
+   "t": "Patch cord Cat.6 UTP 2 m (conf. 10 pezzi)",
+   "b": "Generico",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 24.9,
+   "l": ""
+  },
+  {
+   "t": "Cablaggio strutturato: matassa Cat.6 UTP 305 m",
+   "b": "Generico",
+   "sc": "Networking e infrastruttura",
+   "a": "Tecnologia",
+   "p": 139.0,
+   "l": ""
+  },
+  {
+   "t": "Gruppo di continuità 1.000 VA line-interactive, 6 prese",
+   "b": "APC",
+   "sc": "UPS e alimentatori",
+   "a": "Tecnologia",
+   "p": 189.0,
+   "l": ""
+  },
+  {
+   "t": "Gruppo di continuità 1.500 VA line-interactive, display LCD",
+   "b": "Eaton",
+   "sc": "UPS e alimentatori",
+   "a": "Tecnologia",
+   "p": 289.0,
+   "l": ""
+  },
+  {
+   "t": "Gruppo di continuità 3.000 VA online doppia conversione, rack",
+   "b": "APC",
+   "sc": "UPS e alimentatori",
+   "a": "Tecnologia",
+   "p": 1190.0,
+   "l": ""
+  },
+  {
+   "t": "Ciabatta multipresa 6 posti con protezione sovratensioni",
+   "b": "Generico",
+   "sc": "UPS e alimentatori",
+   "a": "Tecnologia",
+   "p": 19.9,
+   "l": ""
+  },
+  {
+   "t": "Webcam Full HD 1080p con microfono",
+   "b": "Logitech",
+   "sc": "Webcam e fotocamere",
+   "a": "Tecnologia",
+   "p": 59.0,
+   "l": ""
+  },
+  {
+   "t": "Webcam 4K con inquadratura automatica",
+   "b": "Logitech",
+   "sc": "Webcam e fotocamere",
+   "a": "Tecnologia",
+   "p": 149.0,
+   "l": ""
+  },
+  {
+   "t": "Fotocamera mirrorless con obiettivo 16-50 mm",
+   "b": "Canon",
+   "sc": "Webcam e fotocamere",
+   "a": "Tecnologia",
+   "p": 749.0,
+   "l": ""
+  },
+  {
+   "t": "Videocamera 4K per laboratorio multimediale",
+   "b": "Sony",
+   "sc": "Webcam e fotocamere",
+   "a": "Tecnologia",
+   "p": 899.0,
+   "l": ""
+  },
+  {
+   "t": "Action camera 4K con accessori",
+   "b": "Generico",
+   "sc": "Webcam e fotocamere",
+   "a": "Tecnologia",
+   "p": 199.0,
+   "l": ""
+  },
+  {
+   "t": "Treppiede in alluminio 160 cm",
+   "b": "Generico",
+   "sc": "Webcam e fotocamere",
+   "a": "Tecnologia",
+   "p": 39.9,
+   "l": ""
+  },
+  {
+   "t": "Armadio di ricarica per 32 notebook/tablet, con ruote",
+   "b": "Generico",
+   "sc": "Batterie e alimentazione",
+   "a": "Tecnologia",
+   "p": 1290.0,
+   "l": ""
+  },
+  {
+   "t": "Carrello di ricarica per 16 tablet",
+   "b": "Generico",
+   "sc": "Batterie e alimentazione",
+   "a": "Tecnologia",
+   "p": 790.0,
+   "l": ""
+  },
+  {
+   "t": "Power bank 20.000 mAh USB-C",
+   "b": "Generico",
+   "sc": "Batterie e alimentazione",
+   "a": "Tecnologia",
+   "p": 29.9,
+   "l": ""
+  },
+  {
+   "t": "Alimentatore USB-C 65 W universale",
+   "b": "Generico",
+   "sc": "Batterie e alimentazione",
+   "a": "Tecnologia",
+   "p": 34.9,
+   "l": ""
+  },
+  {
+   "t": "Batterie alcaline AA (conf. 40 pezzi)",
+   "b": "Generico",
+   "sc": "Batterie e alimentazione",
+   "a": "Tecnologia",
+   "p": 14.9,
+   "l": ""
+  },
+  {
+   "t": "Banco monoposto regolabile in altezza, piano 70x50 cm",
+   "b": "Generico",
+   "sc": "Banchi e tavoli",
+   "a": "Arredi",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Banco trapezoidale modulare per isole di lavoro",
+   "b": "Generico",
+   "sc": "Banchi e tavoli",
+   "a": "Arredi",
+   "p": 119.0,
+   "l": ""
+  },
+  {
+   "t": "Tavolo per laboratorio 160x80 cm con canalina passacavi",
+   "b": "Generico",
+   "sc": "Banchi e tavoli",
+   "a": "Arredi",
+   "p": 249.0,
+   "l": ""
+  },
+  {
+   "t": "Tavolo riunioni 240x120 cm",
+   "b": "Generico",
+   "sc": "Banchi e tavoli",
+   "a": "Arredi",
+   "p": 449.0,
+   "l": ""
+  },
+  {
+   "t": "Cattedra con cassettiera",
+   "b": "Generico",
+   "sc": "Banchi e tavoli",
+   "a": "Arredi",
+   "p": 299.0,
+   "l": ""
+  },
+  {
+   "t": "Tavolo pieghevole 180x80 cm con ruote",
+   "b": "Generico",
+   "sc": "Banchi e tavoli",
+   "a": "Arredi",
+   "p": 159.0,
+   "l": ""
+  },
+  {
+   "t": "Sedia alunno impilabile in polipropilene, altezza 46 cm",
+   "b": "Generico",
+   "sc": "Sedie e sedute",
+   "a": "Arredi",
+   "p": 39.0,
+   "l": ""
+  },
+  {
+   "t": "Sedia alunno con ruote e seduta basculante",
+   "b": "Generico",
+   "sc": "Sedie e sedute",
+   "a": "Arredi",
+   "p": 129.0,
+   "l": ""
+  },
+  {
+   "t": "Sgabello regolabile per laboratorio",
+   "b": "Generico",
+   "sc": "Sedie e sedute",
+   "a": "Arredi",
+   "p": 69.0,
+   "l": ""
+  },
+  {
+   "t": "Poltrona operativa ergonomica per docenti",
+   "b": "Generico",
+   "sc": "Sedie e sedute",
+   "a": "Arredi",
+   "p": 189.0,
+   "l": ""
+  },
+  {
+   "t": "Pouf modulare in tessuto ignifugo per aree relax",
+   "b": "Generico",
+   "sc": "Sedie e sedute",
+   "a": "Arredi",
+   "p": 149.0,
+   "l": ""
+  },
+  {
+   "t": "Panca a 3 posti per corridoio",
+   "b": "Generico",
+   "sc": "Sedie e sedute",
+   "a": "Arredi",
+   "p": 199.0,
+   "l": ""
+  },
+  {
+   "t": "Armadio metallico 2 ante 180x90x45 cm",
+   "b": "Generico",
+   "sc": "Armadi e scaffalature",
+   "a": "Arredi",
+   "p": 259.0,
+   "l": ""
+  },
+  {
+   "t": "Armadio di sicurezza per reagenti chimici",
+   "b": "Generico",
+   "sc": "Armadi e scaffalature",
+   "a": "Arredi",
+   "p": 1190.0,
+   "l": ""
+  },
+  {
+   "t": "Scaffalatura metallica 5 ripiani 200x100x40 cm",
+   "b": "Generico",
+   "sc": "Armadi e scaffalature",
+   "a": "Arredi",
+   "p": 119.0,
+   "l": ""
+  },
+  {
+   "t": "Casellario portaoggetti 12 vani",
+   "b": "Generico",
+   "sc": "Armadi e scaffalature",
+   "a": "Arredi",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Mobile a giorno con contenitori estraibili",
+   "b": "Generico",
+   "sc": "Armadi e scaffalature",
+   "a": "Arredi",
+   "p": 279.0,
+   "l": ""
+  },
+  {
+   "t": "Postazione docente per laboratorio con torretta prese",
+   "b": "Generico",
+   "sc": "Arredi laboratorio e aule",
+   "a": "Arredi",
+   "p": 690.0,
+   "l": ""
+  },
+  {
+   "t": "Lavagna bianca magnetica 200x120 cm",
+   "b": "Generico",
+   "sc": "Arredi laboratorio e aule",
+   "a": "Arredi",
+   "p": 149.0,
+   "l": ""
+  },
+  {
+   "t": "Pannelli fonoassorbenti a parete (conf. 6 pezzi)",
+   "b": "Generico",
+   "sc": "Arredi laboratorio e aule",
+   "a": "Arredi",
+   "p": 239.0,
+   "l": ""
+  },
+  {
+   "t": "Parete divisoria mobile su ruote",
+   "b": "Generico",
+   "sc": "Arredi laboratorio e aule",
+   "a": "Arredi",
+   "p": 399.0,
+   "l": ""
+  },
+  {
+   "t": "Kit arredo STEAM: tavolo isola + 4 sgabelli + carrello attrezzi",
+   "b": "Generico",
+   "sc": "Arredi laboratorio e aule",
+   "a": "Arredi",
+   "p": 1490.0,
+   "l": ""
+  },
+  {
+   "t": "Tenda oscurante a rullo per aula 150x250 cm",
+   "b": "Generico",
+   "sc": "Arredi laboratorio e aule",
+   "a": "Arredi",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Piattaforma di didattica digitale — licenza istituto 1 anno",
+   "b": "Generico",
+   "sc": "Software didattico",
+   "a": "Software",
+   "p": 1200.0,
+   "l": ""
+  },
+  {
+   "t": "Suite di contenuti didattici interattivi — licenza 25 postazioni",
+   "b": "Generico",
+   "sc": "Software didattico",
+   "a": "Software",
+   "p": 890.0,
+   "l": ""
+  },
+  {
+   "t": "Software per lavagne interattive — licenza perpetua",
+   "b": "SMART",
+   "sc": "Software didattico",
+   "a": "Software",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Software per laboratorio linguistico — 30 postazioni",
+   "b": "Generico",
+   "sc": "Software didattico",
+   "a": "Software",
+   "p": 1490.0,
+   "l": ""
+  },
+  {
+   "t": "Licenza suite produttività per istruzione (per utente/anno)",
+   "b": "Microsoft",
+   "sc": "Software didattico",
+   "a": "Software",
+   "p": 4.5,
+   "l": ""
+  },
+  {
+   "t": "Suite ufficio — licenza perpetua",
+   "b": "Microsoft",
+   "sc": "Software gestionale e ufficio",
+   "a": "Software",
+   "p": 149.0,
+   "l": ""
+  },
+  {
+   "t": "Software di gestione e sicurezza dispositivi (MDM) — per dispositivo/anno",
+   "b": "Generico",
+   "sc": "Software gestionale e ufficio",
+   "a": "Software",
+   "p": 12.0,
+   "l": ""
+  },
+  {
+   "t": "Antivirus endpoint — licenza 1 anno per postazione",
+   "b": "Generico",
+   "sc": "Software gestionale e ufficio",
+   "a": "Software",
+   "p": 24.0,
+   "l": ""
+  },
+  {
+   "t": "Software di backup per server — licenza 1 anno",
+   "b": "Generico",
+   "sc": "Software gestionale e ufficio",
+   "a": "Software",
+   "p": 390.0,
+   "l": ""
+  },
+  {
+   "t": "Software CAD 3D — licenza educational 30 postazioni",
+   "b": "Autodesk",
+   "sc": "Software modellazione 3D",
+   "a": "Software",
+   "p": 0.0,
+   "l": ""
+  },
+  {
+   "t": "Software di modellazione e stampa 3D — licenza istituto",
+   "b": "Generico",
+   "sc": "Software modellazione 3D",
+   "a": "Software",
+   "p": 590.0,
+   "l": ""
+  },
+  {
+   "t": "Software CAM per fresatrice didattica",
+   "b": "Generico",
+   "sc": "Software modellazione 3D",
+   "a": "Software",
+   "p": 790.0,
+   "l": ""
+  },
+  {
+   "t": "Kit robotica educativa per scuola secondaria (classe da 24)",
+   "b": "Lego Education",
+   "sc": "Robotica e coding",
+   "a": "STEAM",
+   "p": 2890.0,
+   "l": ""
+  },
+  {
+   "t": "Robot programmabile per scuola primaria (conf. 6 pezzi)",
+   "b": "Makeblock",
+   "sc": "Robotica e coding",
+   "a": "STEAM",
+   "p": 690.0,
+   "l": ""
+  },
+  {
+   "t": "Kit elettronica e coding con microcontrollore (10 pezzi)",
+   "b": "Arduino",
+   "sc": "Robotica e coding",
+   "a": "STEAM",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Single board computer con kit accessori (10 pezzi)",
+   "b": "Raspberry Pi",
+   "sc": "Robotica e coding",
+   "a": "STEAM",
+   "p": 890.0,
+   "l": ""
+  },
+  {
+   "t": "Robot umanoide programmabile",
+   "b": "Generico",
+   "sc": "Robotica e coding",
+   "a": "STEAM",
+   "p": 1490.0,
+   "l": ""
+  },
+  {
+   "t": "Drone educativo programmabile (conf. 5 pezzi)",
+   "b": "Generico",
+   "sc": "Robotica e coding",
+   "a": "STEAM",
+   "p": 790.0,
+   "l": ""
+  },
+  {
+   "t": "Stampante 3D FDM, volume 220x220x250 mm, chiusa",
+   "b": "Generico",
+   "sc": "Stampanti 3D",
+   "a": "STEAM",
+   "p": 549.0,
+   "l": ""
+  },
+  {
+   "t": "Stampante 3D FDM doppio estrusore, volume 300x300x400 mm",
+   "b": "Generico",
+   "sc": "Stampanti 3D",
+   "a": "STEAM",
+   "p": 1290.0,
+   "l": ""
+  },
+  {
+   "t": "Stampante 3D resina con stazione di lavaggio",
+   "b": "Generico",
+   "sc": "Stampanti 3D",
+   "a": "STEAM",
+   "p": 690.0,
+   "l": ""
+  },
+  {
+   "t": "Scanner 3D portatile",
+   "b": "Generico",
+   "sc": "Stampanti 3D",
+   "a": "STEAM",
+   "p": 890.0,
+   "l": ""
+  },
+  {
+   "t": "Filamento PLA 1,75 mm 1 kg (colori assortiti)",
+   "b": "Generico",
+   "sc": "Stampanti 3D",
+   "a": "STEAM",
+   "p": 22.9,
+   "l": ""
+  },
+  {
+   "t": "Taglierina laser desktop 40 W per materiali leggeri",
+   "b": "Generico",
+   "sc": "Stampanti 3D",
+   "a": "STEAM",
+   "p": 2490.0,
+   "l": ""
+  },
+  {
+   "t": "Microscopio biologico binoculare 1000x con camera digitale",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 389.0,
+   "l": ""
+  },
+  {
+   "t": "Microscopio stereo 40x",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 219.0,
+   "l": ""
+  },
+  {
+   "t": "Kit sensori per fisica con interfaccia di acquisizione dati",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 1290.0,
+   "l": ""
+  },
+  {
+   "t": "Kit chimica di base per 12 postazioni",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 690.0,
+   "l": ""
+  },
+  {
+   "t": "Kit energie rinnovabili (solare, eolico, idrogeno)",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 449.0,
+   "l": ""
+  },
+  {
+   "t": "Telescopio rifrattore 90 mm con montatura",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Cappa aspirante da laboratorio 120 cm",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 2990.0,
+   "l": ""
+  },
+  {
+   "t": "Visore realtà virtuale standalone (conf. 5 pezzi) con contenuti didattici",
+   "b": "Generico",
+   "sc": "Kit scientifici e laboratorio",
+   "a": "STEAM",
+   "p": 2490.0,
+   "l": ""
+  },
+  {
+   "t": "Pianoforte digitale 88 tasti pesati con stand",
+   "b": "Yamaha",
+   "sc": "Strumenti musicali",
+   "a": "Materiale Didattico",
+   "p": 649.0,
+   "l": ""
+  },
+  {
+   "t": "Tastiera arranger 61 tasti",
+   "b": "Casio",
+   "sc": "Strumenti musicali",
+   "a": "Materiale Didattico",
+   "p": 229.0,
+   "l": ""
+  },
+  {
+   "t": "Chitarra classica 4/4 da studio",
+   "b": "Generico",
+   "sc": "Strumenti musicali",
+   "a": "Materiale Didattico",
+   "p": 119.0,
+   "l": ""
+  },
+  {
+   "t": "Set percussioni didattiche (strumentario Orff) per 25 alunni",
+   "b": "Generico",
+   "sc": "Strumenti musicali",
+   "a": "Materiale Didattico",
+   "p": 590.0,
+   "l": ""
+  },
+  {
+   "t": "Mixer audio 8 canali USB",
+   "b": "Yamaha",
+   "sc": "Strumenti musicali",
+   "a": "Materiale Didattico",
+   "p": 219.0,
+   "l": ""
+  },
+  {
+   "t": "Set per podcast: 2 microfoni + interfaccia + cuffie",
+   "b": "Generico",
+   "sc": "Strumenti musicali",
+   "a": "Materiale Didattico",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Set costruzioni magnetiche 100 pezzi",
+   "b": "Generico",
+   "sc": "Giochi educativi e didattici",
+   "a": "Materiale Didattico",
+   "p": 79.0,
+   "l": ""
+  },
+  {
+   "t": "Kit giochi logico-matematici per scuola primaria",
+   "b": "Generico",
+   "sc": "Giochi educativi e didattici",
+   "a": "Materiale Didattico",
+   "p": 149.0,
+   "l": ""
+  },
+  {
+   "t": "Cubetti e regoli per matematica (set classe)",
+   "b": "Generico",
+   "sc": "Giochi educativi e didattici",
+   "a": "Materiale Didattico",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Gioco simbolico: cucina in legno",
+   "b": "Generico",
+   "sc": "Giochi educativi e didattici",
+   "a": "Materiale Didattico",
+   "p": 199.0,
+   "l": ""
+  },
+  {
+   "t": "Kit per lo sviluppo del linguaggio (carte e tabelloni)",
+   "b": "Generico",
+   "sc": "Giochi educativi e didattici",
+   "a": "Materiale Didattico",
+   "p": 69.0,
+   "l": ""
+  },
+  {
+   "t": "Puzzle e incastri in legno (set 10 pezzi)",
+   "b": "Generico",
+   "sc": "Giochi educativi e didattici",
+   "a": "Materiale Didattico",
+   "p": 59.0,
+   "l": ""
+  },
+  {
+   "t": "Kit psicomotricità: cerchi, coni, palle, tappeti",
+   "b": "Generico",
+   "sc": "Materiale psicomotorio e sport",
+   "a": "Materiale Didattico",
+   "p": 249.0,
+   "l": ""
+  },
+  {
+   "t": "Tappeto morbido pieghevole 200x100 cm",
+   "b": "Generico",
+   "sc": "Materiale psicomotorio e sport",
+   "a": "Materiale Didattico",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Set palloni multisport (12 pezzi)",
+   "b": "Generico",
+   "sc": "Materiale psicomotorio e sport",
+   "a": "Materiale Didattico",
+   "p": 119.0,
+   "l": ""
+  },
+  {
+   "t": "Spalliera svedese in legno",
+   "b": "Generico",
+   "sc": "Materiale psicomotorio e sport",
+   "a": "Materiale Didattico",
+   "p": 349.0,
+   "l": ""
+  },
+  {
+   "t": "Rete pallavolo con pali trasportabili",
+   "b": "Generico",
+   "sc": "Materiale psicomotorio e sport",
+   "a": "Materiale Didattico",
+   "p": 290.0,
+   "l": ""
+  },
+  {
+   "t": "Carta A4 80 g (scatola 5 risme)",
+   "b": "Generico",
+   "sc": "Cancelleria e carta",
+   "a": "Consumabili",
+   "p": 24.9,
+   "l": ""
+  },
+  {
+   "t": "Carta A3 80 g (scatola 5 risme)",
+   "b": "Generico",
+   "sc": "Cancelleria e carta",
+   "a": "Consumabili",
+   "p": 49.9,
+   "l": ""
+  },
+  {
+   "t": "Pennarelli per lavagna bianca (conf. 12)",
+   "b": "Generico",
+   "sc": "Cancelleria e carta",
+   "a": "Consumabili",
+   "p": 9.9,
+   "l": ""
+  },
+  {
+   "t": "Quaderni A4 rigatura assortita (conf. 50)",
+   "b": "Generico",
+   "sc": "Cancelleria e carta",
+   "a": "Consumabili",
+   "p": 39.9,
+   "l": ""
+  },
+  {
+   "t": "Set cancelleria per segreteria (raccoglitori, cartelline, etichette)",
+   "b": "Generico",
+   "sc": "Cancelleria e carta",
+   "a": "Consumabili",
+   "p": 59.0,
+   "l": ""
+  },
+  {
+   "t": "Cartucce inchiostro per plotter (set 4 colori)",
+   "b": "HP",
+   "sc": "Cancelleria e carta",
+   "a": "Consumabili",
+   "p": 219.0,
+   "l": ""
+  },
+  {
+   "t": "Toner nero originale alta capacità per stampanti laser",
+   "b": "Brother",
+   "sc": "Toner e consumabili stampa",
+   "a": "Consumabili",
+   "p": 89.0,
+   "l": ""
+  },
+  {
+   "t": "Toner nero originale per multifunzione laser",
+   "b": "HP",
+   "sc": "Toner e consumabili stampa",
+   "a": "Consumabili",
+   "p": 119.0,
+   "l": ""
+  },
+  {
+   "t": "Kit toner 4 colori originale",
+   "b": "HP",
+   "sc": "Toner e consumabili stampa",
+   "a": "Consumabili",
+   "p": 449.0,
+   "l": ""
+  },
+  {
+   "t": "Tamburo/unità immagine originale",
+   "b": "Brother",
+   "sc": "Toner e consumabili stampa",
+   "a": "Consumabili",
+   "p": 99.0,
+   "l": ""
+  },
+  {
+   "t": "Flaconi inchiostro per multifunzione a serbatoio (set 4 colori)",
+   "b": "Epson",
+   "sc": "Toner e consumabili stampa",
+   "a": "Consumabili",
+   "p": 59.0,
+   "l": ""
+  },
+  {
+   "t": "Toner compatibile nero",
+   "b": "Generico",
+   "sc": "Toner e consumabili stampa",
+   "a": "Consumabili",
+   "p": 29.9,
+   "l": ""
+  }
+ ]
+}
