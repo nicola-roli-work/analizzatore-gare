@@ -1,0 +1,3653 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizzatore Gare</title>
+<!-- Tutta la personalizzazione (nome, colori, password, modello, logo) sta in config.js -->
+<script src="config.js"></script>
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  /* Palette neutra predefinita: i valori vengono sovrascritti da config.js (colors) */
+  :root {
+    --blue:       #1E293B;   /* primario (header, titoli) */
+    --blue-dark:  #0F172A;   /* primario scuro (sfondo login) */
+    --blue-mid:   #334155;   /* secondario (sezioni, link) */
+    --accent:     #0F766E;   /* accento (pulsanti principali) */
+    --accent-hover: #115E59;
+    --white:   #FFFFFF;
+    --off:     #F9FAFB;
+    --gray:    #5F6368;
+    --border:  #DADCE0;
+    --text:    #111111;
+    --ok:      #2E7D32;
+    --err:     #C62828;
+    --light-blue: #E2E8F0; /* sfondi chiari */
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: var(--off);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ─────────────────────────────────── */
+  header {
+    background: var(--blue);
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+  }
+  .header-logo img {
+    height: 32px;
+    width: auto;
+  }
+  .header-logo:empty { display: none; }
+  .login-logo:empty { display: none; }
+  .header-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    font-size: 17px;
+    color: var(--white);
+    letter-spacing: .02em;
+  }
+  .header-title span {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255,255,255,.75);
+    font-size: 13px;
+  }
+  .btn-logout {
+    color: var(--blue-mid);
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 5px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: Arial, sans-serif;
+  }
+  .btn-logout:hover { background: var(--blue-mid); color: var(--white); }
+
+  /* ── LAYOUT ─────────────────────────────────── */
+  .app { flex: 1; display: flex; }
+
+  /* ── SIDEBAR ─────────────────────────────────── */
+  .sidebar {
+    width: 280px;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    flex-shrink: 0;
+  }
+  .sidebar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gray);
+    padding: 0 20px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-empty {
+    padding: 16px 20px;
+    font-size: 13px;
+    color: var(--gray);
+    font-style: italic;
+  }
+  .history-list { overflow-y: auto; flex: 1; }
+  .history-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  .history-item:hover { background: var(--off); }
+  .history-item.active { border-left-color: var(--blue-mid); background: var(--light-blue); }
+  .history-item-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-item-meta {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 2px;
+  }
+  .btn-nuova {
+    margin: 16px 20px 0;
+    color: var(--blue-mid);
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-nuova:hover { background: var(--blue-mid); color: var(--white); }
+
+  /* ── MAIN AREA ─────────────────────────────── */
+  main { flex: 1; overflow-y: auto; padding: 40px; }
+
+  /* ── SCREEN: LOGIN ─────────────────────────── */
+  #screen-login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  }
+  .login-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 48px 44px;
+    width: 420px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.3);
+  }
+  .login-logo {
+    margin-bottom: 20px;
+  }
+  .login-logo img {
+    width: 80px;
+    height: auto;
+  }
+  .login-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--blue);
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 32px;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    color: var(--text);
+    background: var(--white);
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field input:focus { border-color: var(--blue-mid); }
+  .field-hint {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: background .2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { background: var(--border); cursor: not-allowed; }
+  .login-error {
+    background: #FFEBEE;
+    color: var(--err);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ── SCREEN: UPLOAD ─────────────────────────── */
+  .upload-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .page-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--blue);
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 36px;
+  }
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 64px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--white);
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--blue-mid);
+    background: var(--light-blue);
+  }
+  .drop-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .drop-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 6px;
+  }
+  .drop-sub { font-size: 13px; color: var(--gray); }
+  .drop-sub span { color: var(--blue-mid); text-decoration: underline; cursor: pointer; }
+  #file-input { display: none; }
+  .files-list { display: none; margin-top: 20px; }
+  .files-list.visible { display: block; }
+  .files-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-mid);
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .file-selected {
+    display: none;
+    margin-top: 8px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    align-items: center;
+    gap: 14px;
+  }
+  .file-selected.visible { display: flex; }
+  .file-icon {
+    width: 40px;
+    height: 40px;
+    background: #FFEBEE;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .file-info { flex: 1; }
+  .file-name { font-size: 14px; font-weight: 500; }
+  .file-size { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .btn-remove {
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+  }
+  .btn-analyze {
+    margin-top: 24px;
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: all .2s;
+    display: none;
+  }
+  .btn-analyze:hover { background: var(--accent-hover); }
+  .btn-analyze.visible { display: block; }
+
+  /* ── SCREEN: PROCESSING ─────────────────────── */
+  .processing-card {
+    max-width: 520px;
+    margin: 60px auto;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+  }
+  .spinner {
+    width: 56px;
+    height: 56px;
+    border: 4px solid var(--border);
+    border-top-color: var(--blue-mid);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+  .processing-sub { font-size: 14px; color: var(--gray); line-height: 1.6; }
+  .progress-steps { margin-top: 28px; text-align: left; }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+  .step.done .step-dot { background: var(--ok); border-color: var(--ok); color: white; }
+  .step.active .step-dot { border-color: var(--blue-mid); animation: pulse 1s infinite; }
+  .step.done, .step.active { color: var(--text); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── SCREEN: RESULTS ─────────────────────────── */
+  .results-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 20px;
+  }
+  .results-meta { font-size: 12px; color: var(--gray); margin-top: 4px; }
+  .results-meta span { color: var(--ok); font-weight: 600; }
+  .btn-download {
+    color: var(--blue-mid);
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-download:hover { background: var(--blue-mid); color: var(--white); }
+
+  .btn-approfondimento {
+    color: var(--white);
+    background: var(--accent);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-approfondimento:hover { background: var(--accent-hover); }
+
+  .approfondimento-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .approfondimento-title {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--blue-dark);
+  }
+  .approfondimento-meta {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+  .approfondimento-body {
+    padding: 20px 24px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #333;
+  }
+  .approfondimento-body h3.appr-h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue-dark);
+    margin: 20px 0 8px 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .approfondimento-body h4.appr-h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue-mid);
+    margin: 14px 0 6px 0;
+  }
+  .approfondimento-body ul {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+  .approfondimento-body li {
+    margin-bottom: 4px;
+  }
+  .approfondimento-body strong {
+    color: var(--blue-dark);
+  }
+  #approfondimento-result {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .section-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .section-header {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--blue-mid);
+    color: white;
+    padding: 10px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .section-fields { padding: 0; }
+  .field-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    border-bottom: 1px solid var(--border);
+    min-height: 44px;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--light-blue);
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 14px;
+  }
+  .field-value {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+  }
+  .field-value.missing {
+    color: var(--gray);
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  /* ── SIDEBAR TABS ─────────────────────────── */
+  .sidebar-tabs {
+    display: flex;
+    padding: 0 12px 12px;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-tab {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    background: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--gray);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all .15s;
+  }
+  .sidebar-tab:hover { background: var(--off); }
+  .sidebar-tab.active {
+    background: var(--light-blue);
+    color: var(--blue-mid);
+  }
+  .archive-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  .archive-item:hover { background: var(--off); }
+  .archive-item.active { border-left-color: var(--blue-mid); background: var(--light-blue); }
+  .archive-item-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .archive-item-meta {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 2px;
+  }
+  .archive-item-importo {
+    font-size: 11px;
+    color: var(--blue-mid);
+    font-weight: 500;
+    margin-top: 1px;
+  }
+  .sidebar-loading {
+    padding: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  /* ── ARCHIVE SEARCH ────────────────────────── */
+  .archive-search-wrap {
+    padding: 0 16px 12px;
+  }
+  .archive-search {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .archive-search:focus { border-color: var(--blue-mid); }
+  .archive-search::placeholder { color: var(--gray); }
+
+  /* ── FILTER PANEL ─────────────────────────── */
+  .filter-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 170px;
+  }
+  .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--gray);
+  }
+  .filter-select, .filter-input {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    color: var(--text);
+    background: var(--white);
+    outline: none;
+  }
+  .filter-select:focus, .filter-input:focus { border-color: var(--blue-mid); }
+  .btn-reset-filters {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--gray);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    transition: all .15s;
+  }
+  .btn-reset-filters:hover { background: var(--off); color: var(--text); }
+
+  /* ── ARCHIVE GRID ─────────────────────────── */
+  .filter-count {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 16px;
+  }
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .gara-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .gara-card:hover {
+    border-color: var(--blue-mid);
+    box-shadow: 0 4px 12px rgba(0,0,0,.10);
+  }
+  .gara-card-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--blue);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .gara-card-field {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+  .gara-card-field strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .gara-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .gara-card-badge {
+    display: inline-block;
+    background: var(--light-blue);
+    color: var(--blue-mid);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .gara-card-valore {
+    display: inline-block;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .gara-card-area {
+    display: inline-block;
+    background: #FFF3E0;
+    color: #E65100;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .gara-card-localita {
+    display: inline-block;
+    background: #F3E5F5;
+    color: #7B1FA2;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .filter-row + .filter-row {
+    margin-top: 10px;
+  }
+
+  /* ── SCORE FATTIBILITA ──────────────────────────── */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .score-badge-sm {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    font-size: 13px;
+  }
+  .score-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .score-section {
+    background: var(--white);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .score-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-mid));
+    color: white;
+  }
+  .score-header-info { flex: 1; }
+  .score-header-letter {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(255,255,255,.3);
+  }
+  .score-header-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .score-header-desc {
+    font-size: 12px;
+    opacity: .8;
+    margin-top: 2px;
+  }
+  .score-body { padding: 20px; }
+  .score-dimension {
+    margin-bottom: 20px;
+  }
+  .score-dimension:last-child { margin-bottom: 0; }
+  .score-dim-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .score-dim-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    text-transform: uppercase;
+  }
+  .score-dim-value {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .score-bar-bg {
+    height: 8px;
+    background: var(--off);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .5s ease;
+  }
+  .score-factor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .score-factor:last-child { border-bottom: none; }
+  .score-factor-name { color: var(--gray); flex: 1; }
+  .score-factor-val {
+    font-weight: 600;
+    min-width: 60px;
+    text-align: right;
+  }
+  .score-factor-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  /* Config pesi modal */
+  .pesi-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .pesi-modal {
+    background: white;
+    border-radius: 16px;
+    width: 560px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  }
+  .pesi-modal h3 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--blue);
+    margin: 0 0 6px;
+    font-size: 16px;
+  }
+  .pesi-modal p {
+    color: var(--gray);
+    font-size: 12px;
+    margin: 0 0 20px;
+  }
+  .pesi-group-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue-mid);
+    text-transform: uppercase;
+    margin: 16px 0 8px;
+  }
+  .pesi-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .pesi-row label {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .pesi-row input[type=range] {
+    width: 120px;
+  }
+  .pesi-row .pesi-val {
+    width: 35px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--blue);
+  }
+  .pesi-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .pesi-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .pesi-btn-primary { background: var(--blue-mid); color: white; }
+  .pesi-btn-secondary { background: var(--off); color: var(--text); }
+  .pesi-btn:hover { opacity: .85; }
+
+  /* ── CONFRONTO GARE ──────────────────────────── */
+  .gara-card-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: transparent;
+    transition: all .15s;
+    z-index: 2;
+  }
+  .gara-card-check:hover { border-color: var(--blue-mid); }
+  .gara-card-check.checked {
+    background: var(--blue-mid);
+    border-color: var(--blue-mid);
+    color: var(--white);
+  }
+  .gara-card { position: relative; }
+  .btn-confronta {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(0,0,0,.25);
+    transition: all .2s;
+    z-index: 200;
+  }
+  .btn-confronta:hover { background: var(--accent-hover); transform: translateY(-2px); }
+  .confronto-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .confronto-table th {
+    background: var(--blue);
+    color: var(--white);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  .confronto-table th:first-child {
+    background: var(--blue);
+    min-width: 180px;
+  }
+  .confronto-section td {
+    background: var(--blue-mid);
+    color: var(--white);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+  }
+  .confronto-table td {
+    padding: 10px 14px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .confronto-table td:first-child {
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--light-blue);
+    font-size: 11px;
+    min-width: 180px;
+  }
+  .confronto-table tr:hover td:not(:first-child) { background: var(--off); }
+  .confronto-table .missing-cell { color: var(--gray); font-style: italic; }
+
+  .archive-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--gray);
+    font-size: 14px;
+  }
+  .btn-export {
+    color: var(--blue-mid);
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-export:hover { background: var(--blue-mid); color: var(--white); }
+
+  /* ── STATISTICHE ─────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .stats-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .stats-card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 16px;
+  }
+  .stats-card canvas {
+    max-height: 280px;
+  }
+  .stats-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .stats-kpi {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stats-kpi-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--blue);
+  }
+  .stats-kpi-label {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .stats-card-full {
+    grid-column: 1 / -1;
+  }
+  .stats-card-full .map-container {
+    height: 420px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* ── UTILS ─────────────────────────────────── */
+  .hidden { display: none !important; }
+  .alert-error {
+    background: #FFEBEE;
+    color: var(--err);
+    border: 1px solid #FFCDD2;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: LOGIN
+════════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo" id="login-logo"></div>
+    <div class="login-heading" id="login-heading">Analizzatore Gare</div>
+    <div class="login-sub" id="login-sub">Accedi con la password condivisa</div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Inserisci la password">
+    </div>
+    <div class="field">
+      <label>API Key Anthropic</label>
+      <input type="password" id="login-apikey" placeholder="sk-ant-...">
+      <div class="field-hint">Inserisci la chiave una sola volta, viene salvata nel browser.</div>
+    </div>
+    <button class="btn-primary" id="btn-login">Accedi</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     APP SHELL (dopo login)
+════════════════════════════════════════════════ -->
+<div id="app-shell" class="hidden">
+  <header>
+    <div class="header-brand">
+      <div class="header-logo" id="header-logo"></div>
+      <div class="header-title" id="header-title"><span>Analizzatore Gare</span></div>
+    </div>
+    <div class="header-user">
+      <button class="btn-logout" id="btn-logout">Esci</button>
+    </div>
+  </header>
+
+  <div class="app">
+    <!-- Sidebar storico + archivio -->
+    <aside class="sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" id="tab-sessione" onclick="switchTab('sessione')">Sessione</button>
+        <button class="sidebar-tab" id="tab-archivio" onclick="switchTab('archivio')">Archivio</button>
+      </div>
+      <div id="sidebar-sessione">
+        <div class="history-list" id="history-list">
+          <div class="sidebar-empty">Nessuna analisi ancora effettuata.</div>
+        </div>
+      </div>
+      <div id="sidebar-archivio" class="hidden">
+        <div class="archive-search-wrap">
+          <input type="text" class="archive-search" id="archive-search"
+                 placeholder="Cerca ente, importo, criterio..." oninput="filtraArchivio()">
+        </div>
+        <div class="history-list" id="archive-list">
+          <div class="sidebar-loading">Caricamento archivio...</div>
+        </div>
+      </div>
+      <button class="btn-nuova" id="btn-nuova">
+        <span>+</span> Nuova analisi
+      </button>
+    </aside>
+
+    <main id="main-area">
+      <!-- Contenuto dinamico -->
+    </main>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONFIGURAZIONE
+// ═══════════════════════════════════════════════════
+// Valori letti da config.js (window.APP_CONFIG) con fallback neutri
+const CFG = Object.assign({
+  app_name: "Analizzatore Gare",
+  company_name: "",
+  company_description: "azienda che fornisce beni e servizi a istituti scolastici ed enti pubblici",
+  login_subtitle: "Accedi con la password condivisa",
+  logo_url: "",
+  logo_login_url: "",
+  password: "",
+  claude_model: "claude-sonnet-4-5",
+  storage_key: "ag_apikey",
+  catalog_url: "data/catalogo_prodotti.json",
+  score_config_url: "data/score_config.json",
+  footer_note: "Documento riservato ad uso interno",
+  colors: {},
+}, window.APP_CONFIG || {});
+const APP_PASSWORD = CFG.password;
+const CLAUDE_MODEL = CFG.claude_model;
+const TITOLO_INTESTAZIONE = CFG.company_name || CFG.app_name;   // intestazione dei PDF
+
+// Applica nome, logo e colori configurati
+(function applicaConfig() {
+  const c = CFG.colors || {};
+  const map = { primary: "--blue", primary_dark: "--blue-dark", secondary: "--blue-mid",
+                accent: "--accent", accent_hover: "--accent-hover", light: "--light-blue" };
+  for (const [k, v] of Object.entries(map)) if (c[k]) document.documentElement.style.setProperty(v, c[k]);
+  document.title = CFG.app_name;
+  document.getElementById("login-heading").textContent = CFG.app_name;
+  document.getElementById("login-sub").textContent = CFG.login_subtitle;
+  const titolo = document.getElementById("header-title");
+  titolo.innerHTML = (CFG.company_name ? escHtml(CFG.company_name) + " &nbsp;&middot;&nbsp; " : "") +
+                     "<span>" + escHtml(CFG.app_name) + "</span>";
+  const logoLogin = CFG.logo_login_url || CFG.logo_url;
+  if (logoLogin) document.getElementById("login-logo").innerHTML = `<img src="${logoLogin}" alt="">`;
+  if (CFG.logo_url) document.getElementById("header-logo").innerHTML = `<img src="${CFG.logo_url}" alt="">`;
+})();
+// Dimensione blocco in caratteri (~40k token): il rate limit dell'organizzazione è oggi
+// 5M token/min, quindi quasi tutti i documenti vengono analizzati in una sola chiamata.
+const CHUNK_SIZE = 150000;
+const OCR_MAX_PAGINE = 20;   // pagine massime inviate come immagini (PDF scansionati)
+const OCR_MAX_PX = 1900;     // lato lungo massimo: l'API rifiuta immagini > 2000px nelle richieste multi-immagine
+const NOT_FOUND = "Non specificato nel documento";
+const MAX_PRODOTTI_PER_CATEGORIA = 30;
+
+let indiceProdottiCache = null;
+let indiceProdottiTs = 0;
+const INDICE_TTL = 24 * 60 * 60 * 1000; // 24 ore
+
+const PROMPT_APPROFONDIMENTO = `Sei un consulente commerciale esperto di ${CFG.company_name || "un'azienda fornitrice"}, ${CFG.company_description}.
+
+Ti vengono forniti:
+1. I DATI DELLA GARA: informazioni estratte dal disciplinare/capitolato
+2. I PRODOTTI DEL CATALOGO: lista di prodotti disponibili, filtrati per le sotto-categorie pertinenti alla gara
+
+Il tuo compito è analizzare la gara e suggerire i prodotti del catalogo più adatti, organizzati per sotto-categoria.
+
+Per ogni sotto-categoria pertinente:
+- Indica 3-5 prodotti consigliati con motivazione breve
+- Segnala se ci sono requisiti specifici (marche, certificazioni, specifiche tecniche) che limitano la scelta
+- Evidenzia eventuali gap: requisiti della gara che il catalogo non copre
+
+Alla fine aggiungi una sezione "Riepilogo strategico" con:
+- Punti di forza dell'offerta per questa gara
+- Criticità o gap da colmare
+- Suggerimenti operativi per la partecipazione
+
+Rispondi in formato strutturato con titoli markdown (## per sotto-categorie, ### per sezioni).
+Sii concreto e pratico, evita generalità.`;
+
+// Sotto-categorie proposte al modello finché il catalogo non è caricato (poi vengono lette dal catalogo)
+const SOTTO_CATEGORIE_DEFAULT = [
+  "Notebook e portatili", "Desktop e workstation", "Tablet", "Monitor e display",
+  "Stampanti e scanner", "Proiettori e lavagne interattive", "Cuffie audio e videoconferenza",
+  "Tastiere mouse e periferiche", "Networking e infrastruttura", "UPS e alimentatori",
+  "Webcam e fotocamere", "Banchi e tavoli", "Sedie e sedute", "Armadi e scaffalature",
+  "Arredi laboratorio e aule", "Software didattico", "Software gestionale e ufficio",
+  "Software modellazione 3D", "Robotica e coding", "Stampanti 3D", "Kit scientifici e laboratorio",
+  "Strumenti musicali", "Giochi educativi e didattici", "Materiale psicomotorio e sport",
+  "Cancelleria e carta", "Toner e consumabili stampa", "Batterie e alimentazione",
+];
+let sottoCategorieCatalogo = SOTTO_CATEGORIE_DEFAULT;
+
+function buildSystemPrompt() {
+  return SYSTEM_PROMPT_TEMPLATE.replace("__SOTTO_CATEGORIE__", sottoCategorieCatalogo.join(", "));
+}
+
+const SYSTEM_PROMPT_TEMPLATE = `Sei un esperto analista di appalti pubblici italiani.
+Analizza i documenti di gara forniti (possono includere Disciplinare, Capitolato Tecnico, Allegati tecnici) ed estrai esattamente i seguenti 30 campi in formato JSON.
+Se sono presenti più documenti, integra le informazioni da tutti: i dati tecnici (prodotti, specifiche, installazione) spesso sono nel Capitolato, quelli amministrativi (scadenze, garanzie, requisiti) nel Disciplinare.
+Per ogni campo non trovato in nessun documento, usa esattamente la stringa "Non specificato nel documento".
+Rispondi SOLO con il JSON, senza testo aggiuntivo, senza markdown, senza backtick.
+
+Campi richiesti:
+{
+  "nome_scuola_meccanografico": "Nome completo dell'ente + codice meccanografico (es. ITC Marconi — PETD03000D) o codice fiscale per altri enti",
+  "stazione_appaltante": "Nome della stazione appaltante se diversa dall'ente",
+  "oggetto_gara": "Descrizione sintetica dell'oggetto della gara",
+  "cup_codice_progetto": "Codice CUP o codice progetto PNRR/PNC (es. B67H23000420006)",
+  "numero_lotti": "Numero di lotti in cui è suddivisa la gara (es. 1, 3, 'Lotto unico')",
+  "importo_totale": "Importo totale a base d'asta in euro (es. 150.000,00 €)",
+  "importo_per_lotto": "Importo per singolo lotto se suddivisa (es. Lotto 1: 50.000 €, Lotto 2: 100.000 €)",
+  "procedura": "Tipo di procedura (es. RDO MePA, Procedura aperta, Affidamento diretto)",
+  "criterio_aggiudicazione": "Criterio di aggiudicazione (es. Minor prezzo, OEPV)",
+  "inizio_procedura": "Data di pubblicazione o avvio procedura (gg/mm/aaaa)",
+  "scadenza_offerta": "Data e ora limite per presentazione offerta (es. 15/03/2026 ore 12:00)",
+  "sopralluogo": "Sopralluogo obbligatorio: si/no, e data se disponibile",
+  "garanzia_minima_obbligatoria": "Garanzia provvisoria minima obbligatoria richiesta (importo o percentuale)",
+  "garanzia_criterio_premiale": "Garanzia come criterio premiale/punteggio aggiuntivo se previsto",
+  "garanzia_cauzione_provvisoria": "Rispondi SOLO 'Sì' o 'No' — è richiesta una garanzia o cauzione provvisoria?",
+  "contributo_anac": "Rispondi SOLO 'Sì' o 'No' — è richiesto il contributo gara ANAC? (obbligatorio per gare sopra 140.000 euro)",
+  "imposta_bollo_partecipazione": "Rispondi SOLO 'Sì' o 'No' — è richiesta l'imposta di bollo di 16 euro sulla domanda/istanza di partecipazione?",
+  "fatturato_minimo": "Fatturato minimo richiesto (es. 200.000 € negli ultimi 3 anni)",
+  "esperienze_pregresse": "Esperienze o forniture pregresse richieste come requisito",
+  "certificazioni": "Certificazioni richieste (es. ISO 9001, CAM, altro)",
+  "checklist_dnsh_cam": "Rispondi SOLO 'Sì' o 'No' — è richiesta una checklist DNSH e/o certificati CAM da caricare con la documentazione di gara?",
+  "installazione_beni": "Descrivi i dettagli dell'installazione richiesta (a carico del fornitore, montaggio, collaudo, tempi, modalità). Se non richiesta, indica 'Non richiesta'",
+  "luogo_consegna": "Indica se la consegna è presso un plesso unico o più plessi. Se più plessi, elencali tutti con indirizzo se disponibile. Formato: 'Plesso unico: [indirizzo]' oppure 'Più plessi: [elenco]'",
+  "elenco_documenti": "Elenca tutti i documenti che il concorrente deve compilare e presentare con la domanda di partecipazione (es. DGUE, dichiarazioni antimafia, PassOE, cauzione, offerta tecnica, offerta economica). Elenco separato da punto e virgola",
+  "categorie_prodotti": "Categorie merceologiche o CPV dei prodotti/servizi richiesti",
+  "marche_specifiche": "Marche o modelli specifici citati (es. Google Workspace, Lenovo, Apple)",
+  "subappalto": "Subappalto ammesso: si/no e condizioni",
+  "varianti": "Varianti ammesse: si/no",
+  "penali": "Penali previste per inadempimento o ritardo — indica percentuale o importo, condizioni di applicazione (es. ritardo consegna, difformità), base di calcolo e tetto massimo se specificati",
+  "note_aggiuntive": "Altre informazioni rilevanti non coperte dai campi precedenti",
+  "aree_tematiche": "Classifica la gara in una o più delle seguenti categorie, SOLO se esplicitamente pertinenti al contenuto del documento: Tecnologia, Arredi, Software, Formazione, Materiale Didattico, STEAM, Laboratori, Strumenti Musicali, Altro. Separa con virgola se più di una. Se non è chiaro, indica Altro.",
+  "sotto_categorie_merceologiche": "Classifica i prodotti/beni richiesti dalla gara in una o più delle seguenti sotto-categorie, SOLO quelle esplicitamente pertinenti. Separa con virgola: __SOTTO_CATEGORIE__."
+}`;
+
+// ═══════════════════════════════════════════════════
+//  STATO APPLICAZIONE
+// ═══════════════════════════════════════════════════
+const state = {
+  apiKey: null,
+  storico: [],
+  corrente: null,
+};
+
+// ═══════════════════════════════════════════════════
+//  STRUTTURA SEZIONI / CAMPI
+// ═══════════════════════════════════════════════════
+const SEZIONI = [
+  { titolo: "Identificazione Gara", campi: [
+    ["nome_scuola_meccanografico", "Ente / Cod. Meccanografico"],
+    ["stazione_appaltante",        "Stazione Appaltante"],
+    ["oggetto_gara",               "Oggetto della Gara"],
+    ["cup_codice_progetto",        "CUP / Codice Progetto"],
+    ["numero_lotti",               "Numero Lotti"],
+    ["procedura",                  "Tipo di Procedura"],
+    ["criterio_aggiudicazione",    "Criterio di Aggiudicazione"],
+  ]},
+  { titolo: "Importi", campi: [
+    ["importo_totale",   "Importo Totale"],
+    ["importo_per_lotto","Importo per Lotto"],
+  ]},
+  { titolo: "Date e Scadenze", campi: [
+    ["inizio_procedura", "Avvio Procedura"],
+    ["scadenza_offerta", "Scadenza Offerta"],
+    ["sopralluogo",      "Sopralluogo"],
+  ]},
+  { titolo: "Condizioni Amministrative", campi: [
+    ["garanzia_minima_obbligatoria",  "Garanzia Obbligatoria"],
+    ["garanzia_criterio_premiale",    "Garanzia Criterio Premiale"],
+    ["garanzia_cauzione_provvisoria", "Garanzia / Cauzione Provvisoria"],
+    ["contributo_anac",               "Contributo Gara ANAC"],
+    ["imposta_bollo_partecipazione",  "Imposta di Bollo Partecipazione"],
+  ]},
+  { titolo: "Requisiti e Condizioni", campi: [
+    ["fatturato_minimo",             "Fatturato Minimo"],
+    ["esperienze_pregresse",         "Esperienze Pregresse"],
+    ["certificazioni",               "Certificazioni Richieste"],
+    ["checklist_dnsh_cam",           "Checklist DNSH / Certificati CAM"],
+    ["subappalto",                   "Subappalto"],
+    ["varianti",                     "Varianti"],
+    ["penali",                       "Penali"],
+  ]},
+  { titolo: "Fornitura e Logistica", campi: [
+    ["installazione_beni",  "Installazione dei Beni"],
+    ["luogo_consegna",      "Luogo di Consegna"],
+  ]},
+  { titolo: "Documentazione", campi: [
+    ["elenco_documenti",  "Elenco Documenti da Compilare"],
+  ]},
+  { titolo: "Prodotti e Note", campi: [
+    ["categorie_prodotti", "Categorie / CPV"],
+    ["marche_specifiche",  "Marche / Modelli Specifici"],
+    ["note_aggiuntive",    "Note Aggiuntive"],
+    ["aree_tematiche",     "Aree Tematiche"],
+    ["sotto_categorie_merceologiche", "Sotto-categorie Merceologiche"],
+  ]},
+];
+const TOTALE_CAMPI = SEZIONI.reduce((n, s) => n + s.campi.length, 0);   // campi analisi da browser
+const TOTALE_CAMPI_PIPELINE = 32;                                           // campi analisi pipeline desktop
+
+// ═══════════════════════════════════════════════════
+//  PDF.js worker
+// ═══════════════════════════════════════════════════
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+// ═══════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════
+// Carica API key salvata se presente
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem(CFG.storage_key);
+  if (saved) document.getElementById("login-apikey").value = saved;
+});
+
+document.getElementById("btn-login").addEventListener("click", doLogin);
+document.getElementById("login-password").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+document.getElementById("login-apikey").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+function doLogin() {
+  const password = document.getElementById("login-password").value;
+  const apiKey   = document.getElementById("login-apikey").value.trim();
+  const errEl    = document.getElementById("login-error");
+
+  errEl.style.display = "none";
+
+  if (!APP_PASSWORD) {
+    errEl.textContent = "Password dell'app non configurata: imposta 'password' in config.js.";
+    errEl.style.display = "block";
+    return;
+  }
+  if (password !== APP_PASSWORD) {
+    errEl.textContent = "Password non valida.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  if (!apiKey || !apiKey.startsWith("sk-")) {
+    errEl.textContent = "Inserisci una API key Anthropic valida (inizia con sk-).";
+    errEl.style.display = "block";
+    return;
+  }
+
+  state.apiKey = apiKey;
+  localStorage.setItem(CFG.storage_key, apiKey);
+
+  document.getElementById("screen-login").classList.add("hidden");
+  document.getElementById("app-shell").classList.remove("hidden");
+  mostraUpload();
+}
+
+// ═══════════════════════════════════════════════════
+//  LOGOUT / NUOVA ANALISI
+// ═══════════════════════════════════════════════════
+document.getElementById("btn-logout").addEventListener("click", () => {
+  state.apiKey = null;
+  state.storico = [];
+  state.corrente = null;
+  document.getElementById("app-shell").classList.add("hidden");
+  document.getElementById("screen-login").classList.remove("hidden");
+  document.getElementById("login-password").value = "";
+  document.getElementById("login-error").style.display = "none";
+});
+
+document.getElementById("btn-nuova").addEventListener("click", mostraUpload);
+
+// ═══════════════════════════════════════════════════
+//  SCREEN: UPLOAD
+// ═══════════════════════════════════════════════════
+let fileScelti = [];
+
+function mostraUpload() {
+  state.corrente = null;
+  fileScelti = [];
+  aggiornaHistoryUI();
+
+  document.getElementById("main-area").innerHTML = `
+    <div class="upload-wrapper">
+      <div class="page-heading">Nuova analisi</div>
+      <div class="page-sub">Carica uno o più PDF della stessa gara (Disciplinare, Capitolato, Allegati) per ottenere un'analisi unificata.</div>
+
+      <div class="drop-zone" id="drop-zone">
+        <span class="drop-icon">&#128196;</span>
+        <div class="drop-title">Trascina qui i PDF</div>
+        <div class="drop-sub">oppure <span id="browse-link">seleziona dal computer</span> (anche più file)</div>
+        <input type="file" id="file-input" accept=".pdf" multiple>
+      </div>
+
+      <div class="files-list" id="files-list"></div>
+
+      <button class="btn-analyze" id="btn-analyze">Analizza Documenti</button>
+    </div>
+  `;
+
+  // Drag & Drop
+  const dz = document.getElementById("drop-zone");
+  dz.addEventListener("dragover",  e => { e.preventDefault(); dz.classList.add("drag-over"); });
+  dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+  dz.addEventListener("drop", e => {
+    e.preventDefault();
+    dz.classList.remove("drag-over");
+    const nuovi = [...e.dataTransfer.files].filter(f => f.type === "application/pdf");
+    if (nuovi.length) aggiungiFile(nuovi);
+  });
+
+  document.getElementById("browse-link").addEventListener("click", () =>
+    document.getElementById("file-input").click()
+  );
+  document.getElementById("file-input").addEventListener("change", e => {
+    const nuovi = [...e.target.files].filter(f => f.type === "application/pdf");
+    if (nuovi.length) aggiungiFile(nuovi);
+    e.target.value = "";
+  });
+
+  document.getElementById("btn-analyze").addEventListener("click", avviaAnalisi);
+}
+
+function aggiungiFile(nuoviFile) {
+  for (const f of nuoviFile) {
+    if (!fileScelti.some(x => x.name === f.name && x.size === f.size)) {
+      fileScelti.push(f);
+    }
+  }
+  aggiornaListaFile();
+}
+
+function rimuoviFileDaLista(idx) {
+  fileScelti.splice(idx, 1);
+  aggiornaListaFile();
+}
+
+function aggiornaListaFile() {
+  const container = document.getElementById("files-list");
+  const btn = document.getElementById("btn-analyze");
+  if (!fileScelti.length) {
+    container.innerHTML = "";
+    container.classList.remove("visible");
+    btn.classList.remove("visible");
+    return;
+  }
+  container.classList.add("visible");
+  btn.classList.add("visible");
+  btn.textContent = fileScelti.length === 1 ? "Analizza Disciplinare" : `Analizza ${fileScelti.length} documenti`;
+  const totSize = fileScelti.reduce((s, f) => s + f.size, 0);
+  container.innerHTML = `
+    <div class="files-header">${fileScelti.length} documento/i selezionato/i &mdash; ${formatSize(totSize)}</div>
+    ${fileScelti.map((f, i) => `
+      <div class="file-selected visible">
+        <div class="file-icon">&#128203;</div>
+        <div class="file-info">
+          <div class="file-name">${escHtml(f.name)}</div>
+          <div class="file-size">${formatSize(f.size)}</div>
+        </div>
+        <button class="btn-remove" onclick="rimuoviFileDaLista(${i})">&#10005;</button>
+      </div>
+    `).join("")}
+  `;
+}
+
+function formatSize(bytes) {
+  return bytes > 1024 * 1024
+    ? (bytes / 1024 / 1024).toFixed(1) + " MB"
+    : Math.round(bytes / 1024) + " KB";
+}
+
+// ═══════════════════════════════════════════════════
+//  ESTRAZIONE TESTO DA PDF (client-side con pdf.js)
+// ═══════════════════════════════════════════════════
+async function estraiTestoPdf(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let testo = "";
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items.map(item => item.str).join(" ");
+    testo += pageText + "\n";
+  }
+  return { text: testo, numPages: pdf.numPages };
+}
+
+// ═══════════════════════════════════════════════════
+//  CHIAMATA API CLAUDE (diretta dal browser)
+// ═══════════════════════════════════════════════════
+function parseJsonRobusto(raw) {
+  raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+  const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
+  if (s !== -1 && e > s) raw = raw.slice(s, e + 1);
+  return JSON.parse(raw);
+}
+
+// Chiamata base: ritenta su 429/529/5xx con attesa crescente (15s, 30s)
+async function chiamaApiRaw(content, tentativo = 1) {
+  let response;
+  try {
+    response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": state.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 8192,
+        system: buildSystemPrompt(),
+        messages: [{ role: "user", content }],
+      }),
+    });
+  } catch (e) {
+    throw new Error("Impossibile contattare l'API Claude (connessione di rete): " + e.message);
+  }
+
+  if (!response.ok) {
+    const errBody = await response.text();
+    const transitorio = response.status === 429 || response.status === 529 || response.status >= 500;
+    if (transitorio && tentativo < 3) {
+      await new Promise(r => setTimeout(r, 15000 * tentativo));
+      return chiamaApiRaw(content, tentativo + 1);
+    }
+    if (response.status === 401) throw new Error("API key Anthropic non valida o revocata (401). Esci e inserisci una chiave aggiornata.");
+    throw new Error("Errore API Claude (" + response.status + "): " + errBody);
+  }
+
+  const result = await response.json();
+  const raw = result.content[0].text.trim();
+  try {
+    return parseJsonRobusto(raw);
+  } catch (e) {
+    if (tentativo < 3) return chiamaApiRaw(content, tentativo + 1);   // risposta non JSON: riprova
+    throw new Error("Risposta del modello non interpretabile come JSON dopo 3 tentativi.");
+  }
+}
+
+async function chiamaApi(testo, blocco, totale) {
+  const contesto = totale > 1
+    ? `[Blocco ${blocco}/${totale} del documento. Estrai solo le info presenti in questo blocco.]\n\n`
+    : "";
+  return chiamaApiRaw([{ type: "text", text:
+    "Analizza i seguenti documenti di gara (possono includere Disciplinare, Capitolato Tecnico, Allegati). " +
+    "Estrai le informazioni richieste integrando i dati da tutti i documenti forniti:\n\n" + contesto + testo }]);
+}
+
+// Fallback per PDF scansionati: le pagine vengono inviate come immagini (vision)
+async function chiamaApiVision(immagini) {
+  const content = immagini.map(img => ({ type: "image", source: { type: "base64", media_type: "image/png", data: img } }));
+  content.push({ type: "text", text:
+    "Analizza i seguenti documenti di gara forniti come immagini scansionate (possono includere Disciplinare, " +
+    "Capitolato Tecnico, Allegati). Leggi il testo dalle immagini ed estrai le informazioni richieste integrando i dati da tutti i documenti." });
+  return chiamaApiRaw(content);
+}
+
+async function renderPagineImmagini(files) {
+  const immagini = [];
+  for (const file of files) {
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    for (let i = 1; i <= pdf.numPages && immagini.length < OCR_MAX_PAGINE; i++) {
+      const page = await pdf.getPage(i);
+      const base = page.getViewport({ scale: 1 });
+      const scale = Math.min(150 / 72, OCR_MAX_PX / Math.max(base.width, base.height));
+      const vp = page.getViewport({ scale });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(vp.width);
+      canvas.height = Math.floor(vp.height);
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+      immagini.push(canvas.toDataURL("image/png").split(",")[1]);
+    }
+    if (immagini.length >= OCR_MAX_PAGINE) break;
+  }
+  return immagini;
+}
+
+function unisciRisultati(lista) {
+  const campi = SEZIONI.flatMap(s => s.campi.map(c => c[0]));
+  const risultato = {};
+  for (const key of campi) {
+    for (const dati of lista) {
+      const val = dati[key];
+      if (val && val !== NOT_FOUND) { risultato[key] = val; break; }
+    }
+    if (!risultato[key]) risultato[key] = NOT_FOUND;
+  }
+  return risultato;
+}
+
+// ═══════════════════════════════════════════════════
+//  APPROFONDIMENTO PRODOTTI CON CLAUDE
+// ═══════════════════════════════════════════════════
+async function caricaIndiceProdotti() {
+  if (indiceProdottiCache && (Date.now() - indiceProdottiTs) < INDICE_TTL) return indiceProdottiCache;
+  const resp = await fetch(CFG.catalog_url, { cache: "no-cache" });
+  if (!resp.ok) throw new Error("Impossibile caricare il catalogo prodotti (" + CFG.catalog_url + ")");
+  indiceProdottiCache = await resp.json();
+  indiceProdottiTs = Date.now();
+  // Ricava dal catalogo: sotto-categorie (per il prompt), conteggi (profondità), marchi, mappa
+  const conteggi = {}, marchi = new Set();
+  for (const p of indiceProdottiCache.prodotti || []) {
+    const sc = (p.sc || "Altro").trim();
+    conteggi[sc] = (conteggi[sc] || 0) + 1;
+    const b = (p.b || "").trim().toLowerCase();
+    if (b.length > 1) marchi.add(b);
+  }
+  catalogoInfo = {
+    conteggi,
+    marchi: [...marchi].sort(),
+    mappa: Object.fromEntries(Object.entries(indiceProdottiCache.mappa_sotto_categorie || {}).map(([k, v]) => [k.toLowerCase(), v])),
+  };
+  const sc = Object.keys(conteggi).sort();
+  if (sc.length) sottoCategorieCatalogo = sc;
+  return indiceProdottiCache;
+}
+let catalogoInfo = { conteggi: {}, marchi: [], mappa: {} };
+
+// Mappa opzionale "sotto-categoria generica" -> [sotto-categorie del catalogo].
+// Si definisce nel file catalogo (chiave "mappa_sotto_categorie"); vuota = corrispondenza diretta.
+function mappaSottoCategorie() { return catalogoInfo.mappa || {}; }
+
+function filtraProdottiPerGara(indice, dati) {
+  const sottoCategorie = (dati.sotto_categorie_merceologiche || "")
+    .split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+  if (!sottoCategorie.length) return { filtrati: [], perCategoria: {} };
+
+  // Espandi le sotto-categorie generiche nelle sotto-categorie del catalogo
+  const categorieReali = new Set();
+  const MAPPA = mappaSottoCategorie();
+  for (const sc of sottoCategorie) {
+    const mappate = MAPPA[sc];
+    if (mappate) {
+      mappate.forEach(c => categorieReali.add(c.toLowerCase()));
+    } else {
+      categorieReali.add(sc);
+    }
+  }
+
+  // Filtra anche per area tematica come fallback
+  const aree = (dati.aree_tematiche || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+
+  const perCategoria = {};
+  for (const p of indice.prodotti) {
+    const sc = (p.sc || "").toLowerCase();
+    const area = (p.a || "").toLowerCase();
+    const matchCat = categorieReali.has(sc) || [...categorieReali].some(c => sc.includes(c) || c.includes(sc));
+    if (matchCat) {
+      const catKey = p.sc || "Altro";
+      if (!perCategoria[catKey]) perCategoria[catKey] = [];
+      perCategoria[catKey].push(p);
+    }
+  }
+
+  // Max N prodotti per categoria — campionamento rappresentativo per fascia di prezzo
+  const filtrati = [];
+  for (const [cat, prods] of Object.entries(perCategoria)) {
+    let selezionati;
+    if (prods.length <= MAX_PRODOTTI_PER_CATEGORIA) {
+      selezionati = prods;
+    } else {
+      // Campiona uniformemente lungo la distribuzione di prezzo
+      prods.sort((a, b) => a.p - b.p);
+      selezionati = [];
+      const step = prods.length / MAX_PRODOTTI_PER_CATEGORIA;
+      for (let i = 0; i < MAX_PRODOTTI_PER_CATEGORIA; i++) {
+        selezionati.push(prods[Math.floor(i * step)]);
+      }
+    }
+    selezionati.sort((a, b) => a.p - b.p);
+    perCategoria[cat] = selezionati;
+    filtrati.push(...selezionati);
+  }
+  return { filtrati, perCategoria };
+}
+
+function costruisciTestoProdotti(perCategoria, baseUrl) {
+  let testo = "";
+  for (const [cat, prods] of Object.entries(perCategoria)) {
+    testo += `\n## ${cat} (${prods.length} prodotti)\n`;
+    for (const p of prods) {
+      const link = p.l ? ` | ${baseUrl || ""}${p.l}` : "";
+      testo += `- ${p.t} | ${p.b || "n/d"} | ${p.p} EUR${link}\n`;
+    }
+  }
+  return testo;
+}
+
+function costruisciRiepilogoGara(dati) {
+  const campiRilevanti = [
+    "oggetto_gara", "valore_appalto", "numero_lotti", "importo_per_lotto",
+    "criterio_aggiudicazione", "categorie_prodotti", "marche_specifiche",
+    "certificazioni", "installazione_beni", "sotto_categorie_merceologiche",
+    "aree_tematiche"
+  ];
+  let riepilogo = "";
+  for (const key of campiRilevanti) {
+    const val = dati[key];
+    if (val && val !== NOT_FOUND) {
+      riepilogo += `${key}: ${val}\n`;
+    }
+  }
+  return riepilogo;
+}
+
+async function avviaApprofondimento(garaIdx) {
+  const gara = archivioData.gare[garaIdx];
+  const dati = archivioCache[gara.id];
+
+  const container = document.getElementById("approfondimento-result");
+  if (!container) { alert("Errore: container approfondimento non trovato"); return; }
+
+  if (!dati) {
+    container.style.display = "block";
+    container.innerHTML = `<div class="alert-error">Dati della gara non disponibili. Ricarica la pagina e riprova.</div>`;
+    container.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="processing-card" style="margin-top:0;">
+      <div class="spinner"></div>
+      <div class="processing-title">Analisi prodotti in corso...</div>
+      <div class="processing-sub">Caricamento catalogo e invio a Claude AI. Attendere 20-50 secondi.</div>
+    </div>`;
+  container.style.display = "block";
+  container.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  try {
+    // 1. Carica indice prodotti
+    const indice = await caricaIndiceProdotti();
+
+    // 2. Filtra per sotto-categorie della gara
+    const { filtrati, perCategoria } = filtraProdottiPerGara(indice, dati);
+
+    if (!filtrati.length) {
+      container.innerHTML = `<div class="alert-error">Nessun prodotto trovato nel catalogo per le sotto-categorie di questa gara.
+        <br>Sotto-categorie gara: ${escHtml(dati.sotto_categorie_merceologiche || "nessuna")}</div>`;
+      return;
+    }
+
+    // 3. Costruisci prompt
+    const testoProdotti = costruisciTestoProdotti(perCategoria, indice.base_url);
+    const riepilogoGara = costruisciRiepilogoGara(dati);
+    const numProdotti = filtrati.length;
+    const numCategorie = Object.keys(perCategoria).length;
+
+    const userMessage = `DATI DELLA GARA:\n${riepilogoGara}\n\nPRODOTTI CATALOGO (${numProdotti} prodotti in ${numCategorie} sotto-categorie):\n${testoProdotti}`;
+
+    // 4. Chiama Claude
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": state.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 4096,
+        system: PROMPT_APPROFONDIMENTO,
+        messages: [{ role: "user", content: userMessage }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error("Errore API Claude (" + response.status + "): " + errBody);
+    }
+
+    const result = await response.json();
+    const risposta = result.content[0].text.trim();
+
+    // 5. Renderizza risultato (markdown semplice → HTML)
+    const htmlRisposta = markdownSemplice(risposta);
+
+    container.innerHTML = `
+      <div class="approfondimento-header">
+        <div class="approfondimento-title">Analisi Prodotti Dettagliata</div>
+        <div class="approfondimento-meta">${numProdotti} prodotti analizzati in ${numCategorie} sotto-categorie</div>
+      </div>
+      <div class="approfondimento-body">${htmlRisposta}</div>`;
+
+  } catch (e) {
+    container.innerHTML = `<div class="alert-error">Errore durante l'approfondimento: ${escHtml(e.message)}</div>`;
+  }
+}
+
+function markdownSemplice(md) {
+  return md
+    .replace(/^### (.+)$/gm, '<h4 class="appr-h4">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 class="appr-h3">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n- /g, '\n<li>')
+    .replace(/(<li>.*?)(?=\n<li>|\n<h|$)/gs, '$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+    .replace(/<\/ul>\s*<ul>/g, '')
+    .replace(/\n{2,}/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+// ═══════════════════════════════════════════════════
+//  ANALISI
+// ═══════════════════════════════════════════════════
+async function avviaAnalisi() {
+  if (!fileScelti.length) return;
+  const nomiFile = fileScelti.map(f => f.name);
+  const etichetta = nomiFile.length === 1 ? nomiFile[0] : `${nomiFile.length} documenti`;
+
+  mostraProcessing(etichetta);
+
+  try {
+    // 1. Estrai testo da tutti i PDF
+    let testoCompleto = "";
+    let pagineTotali = 0;
+    for (let i = 0; i < fileScelti.length; i++) {
+      const pdfData = await estraiTestoPdf(fileScelti[i]);
+      if (fileScelti.length > 1) {
+        testoCompleto += `\n\n═══════════════════════════════════════\n  DOCUMENTO ${i + 1}/${fileScelti.length}: ${fileScelti[i].name}\n═══════════════════════════════════════\n\n`;
+      }
+      testoCompleto += pdfData.text;
+      pagineTotali += pdfData.numPages;
+    }
+
+    setStep(1);
+
+    let blocchi = [];
+    let datiFinal;
+    let scansionato = false;
+
+    if (!testoCompleto || testoCompleto.trim().length < 200) {
+      // PDF senza layer di testo (scansionato): fallback OCR tramite vision di Claude
+      scansionato = true;
+      const sub = document.querySelector(".processing-sub");
+      if (sub) sub.innerHTML += "<br><em>Documento scansionato: lettura delle pagine come immagini (1-2 minuti)...</em>";
+      const immagini = await renderPagineImmagini(fileScelti);
+      if (!immagini.length) throw new Error("PDF non leggibili: nessuna pagina renderizzabile.");
+      datiFinal = await chiamaApiVision(immagini);
+      blocchi = [null];
+    } else {
+      // 2. Suddividi in blocchi solo per documenti molto lunghi (> CHUNK_SIZE caratteri)
+      if (testoCompleto.length <= CHUNK_SIZE) {
+        blocchi = [testoCompleto];
+      } else {
+        let inizio = 0;
+        while (inizio < testoCompleto.length) {
+          let fine = inizio + CHUNK_SIZE;
+          if (fine < testoCompleto.length) {
+            const finePara = testoCompleto.lastIndexOf("\n", fine);
+            if (finePara > inizio + CHUNK_SIZE / 2) fine = finePara;
+          }
+          blocchi.push(testoCompleto.slice(inizio, fine));
+          inizio = fine;
+        }
+      }
+
+      // 3. Analizza ogni blocco (nessuna pausa fissa: i limiti API sono gestiti con retry in chiamaApiRaw)
+      const risultati = [];
+      for (let i = 0; i < blocchi.length; i++) {
+        risultati.push(await chiamaApi(blocchi[i], i + 1, blocchi.length));
+      }
+      datiFinal = blocchi.length > 1 ? unisciRisultati(risultati) : risultati[0];
+    }
+
+    setStep(2);
+    setStep(3);
+
+    // 4. Salva in storico
+    const voce = {
+      nomeFile: nomiFile.length === 1 ? nomiFile[0] : nomiFile.join(" + "),
+      nomiFile,
+      dati: datiFinal,
+      pagine: pagineTotali,
+      numDocumenti: fileScelti.length,
+      blocchi: blocchi.length,
+      scansionato,
+      ts: new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }),
+      compilati: Object.values(datiFinal).filter(v => v !== NOT_FOUND).length,
+    };
+    state.storico.unshift(voce);
+    state.corrente = 0;
+    aggiornaHistoryUI();
+
+    setTimeout(() => mostraRisultati(0), 600);
+
+  } catch (e) {
+    document.getElementById("main-area").innerHTML = `
+      <div class="upload-wrapper">
+        <div class="alert-error">Errore durante l'analisi: ${escHtml(e.message)}</div>
+        <button class="btn-primary" onclick="mostraUpload()" style="max-width:200px; margin-top:16px;">Riprova</button>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  SCREEN: PROCESSING
+// ═══════════════════════════════════════════════════
+const STEPS = ["Lettura PDF", "Analisi con Claude AI", "Generazione scheda"];
+let stepCorrente = 0;
+
+function mostraProcessing(nomeFile) {
+  stepCorrente = 0;
+  document.getElementById("main-area").innerHTML = `
+    <div class="processing-card">
+      <div class="spinner"></div>
+      <div class="processing-title">Analisi in corso...</div>
+      <div class="processing-sub">
+        <strong>${escHtml(nomeFile)}</strong><br>
+        L'analisi richiede in genere 20-60 secondi (fino a 2 minuti per documenti scansionati).
+      </div>
+      <div class="progress-steps" id="progress-steps">
+        ${STEPS.map((s, i) => `
+          <div class="step ${i === 0 ? 'active' : ''}" id="step-${i}">
+            <div class="step-dot"></div>
+            <span>${s}</span>
+          </div>`).join("")}
+      </div>
+    </div>`;
+}
+
+function setStep(idx) {
+  for (let i = 0; i < idx; i++) {
+    const el = document.getElementById("step-" + i);
+    if (el) { el.className = "step done"; el.querySelector(".step-dot").textContent = "\u2713"; }
+  }
+  const curr = document.getElementById("step-" + idx);
+  if (curr) curr.className = "step active";
+  stepCorrente = idx;
+}
+
+// ═══════════════════════════════════════════════════
+//  SCREEN: RESULTS
+// ═══════════════════════════════════════════════════
+function mostraRisultati(idx) {
+  state.corrente = idx;
+  aggiornaHistoryUI();
+  const voce = state.storico[idx];
+  const { dati, nomeFile, pagine, compilati, blocchi, ts, numDocumenti } = voce;
+
+  const sezioniHtml = SEZIONI.map(sez => `
+    <div class="section-card">
+      <div class="section-header">${sez.titolo}</div>
+      <div class="section-fields">
+        ${sez.campi.map(([key, label]) => {
+          const val = dati[key] || NOT_FOUND;
+          const missing = val === NOT_FOUND;
+          return `<div class="field-row">
+            <div class="field-label">${label}</div>
+            <div class="field-value ${missing ? 'missing' : ''}">${missing ? '\u2014' : escHtml(val)}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`).join("");
+
+  const docLabel = (numDocumenti > 1 ? `${numDocumenti} documenti` : "documento singolo") + (voce.scansionato ? " · scansionato (OCR)" : "");
+
+  document.getElementById("main-area").innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="page-heading">${escHtml(nomeFile.replace(".pdf",""))}</div>
+        <div class="results-meta">
+          ${pagine} pag. &nbsp;·&nbsp;
+          <span>${compilati}/${TOTALE_CAMPI} campi compilati</span> &nbsp;·&nbsp;
+          ${docLabel}${blocchi > 1 ? ` (${blocchi} blocchi)` : ""} &nbsp;·&nbsp;
+          ore ${ts}
+        </div>
+      </div>
+      <button class="btn-download" onclick="scaricaPdf(${idx})">Scarica PDF Scheda</button>
+    </div>
+    ${sezioniHtml}`;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\n/g,"<br>");
+}
+
+// ═══════════════════════════════════════════════════
+//  STORICO SIDEBAR
+// ═══════════════════════════════════════════════════
+function aggiornaHistoryUI() {
+  const list = document.getElementById("history-list");
+  if (state.storico.length === 0) {
+    list.innerHTML = '<div class="sidebar-empty">Nessuna analisi ancora effettuata.</div>';
+    return;
+  }
+  list.innerHTML = state.storico.map((v, i) => `
+    <div class="history-item ${state.corrente === i ? 'active' : ''}" onclick="mostraRisultati(${i})">
+      <div class="history-item-name">${escHtml(v.nomeFile)}</div>
+      <div class="history-item-meta">${v.compilati}/${TOTALE_CAMPI} campi · ore ${v.ts}</div>
+    </div>`).join("");
+}
+
+// ═══════════════════════════════════════════════════
+//  SCARICA PDF (jsPDF client-side)
+// ═══════════════════════════════════════════════════
+function scaricaPdf(idx) {
+  const { jsPDF } = window.jspdf;
+  const voce  = state.storico[idx];
+  const { dati, nomeFile, compilati } = voce;
+  const doc   = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+  const W     = 210, ML = 18, MR = 18, TW = W - ML - MR;
+  const BLUE  = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue("--blue").trim() || "#1E293B");
+  const GOLD  = hexToRgb(getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#0F766E");
+  const GRAY  = [138, 148, 166];
+  let y = 18;
+
+  // Header
+  doc.setFillColor(BLUE[0], BLUE[1], BLUE[2]);
+  doc.rect(0, 0, W, 28, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text(TITOLO_INTESTAZIONE, ML, 12);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(CFG.app_name + " - Scheda Analisi Disciplinare di Gara", ML, 19);
+  doc.text("Elaborata il " + new Date().toLocaleDateString("it-IT") + " - " + compilati + "/" + TOTALE_CAMPI + " campi", ML, 25);
+  y = 36;
+
+  // Accent line
+  doc.setFillColor(GOLD[0], GOLD[1], GOLD[2]);
+  doc.rect(ML, y-4, TW, 1.5, "F");
+
+  SEZIONI.forEach(sez => {
+    if (y > 265) { doc.addPage(); y = 20; }
+    doc.setFillColor(BLUE[0], BLUE[1], BLUE[2]);
+    doc.rect(ML, y, TW, 7, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text(sez.titolo.toUpperCase(), ML + 3, y + 5);
+    y += 9;
+
+    sez.campi.forEach(([key, label]) => {
+      const val     = dati[key] || NOT_FOUND;
+      const missing = val === NOT_FOUND;
+      const lines   = doc.splitTextToSize(missing ? "\u2014" : val, TW - 68);
+      const rowH    = Math.max(8, lines.length * 4.5 + 4);
+
+      if (y + rowH > 282) { doc.addPage(); y = 20; }
+
+      doc.setFillColor(247, 250, 253);
+      doc.rect(ML, y, 62, rowH, "F");
+      doc.setDrawColor(221, 227, 236);
+      doc.rect(ML, y, TW, rowH);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(BLUE[0], BLUE[1], BLUE[2]);
+      doc.text(label, ML + 2, y + 5);
+
+      doc.setFont("helvetica", missing ? "italic" : "normal");
+      doc.setFontSize(8);
+      if (missing) {
+        doc.setTextColor(GRAY[0], GRAY[1], GRAY[2]);
+      } else {
+        doc.setTextColor(28, 43, 58);
+      }
+      doc.text(lines, ML + 64, y + 5);
+      y += rowH;
+    });
+    y += 4;
+  });
+
+  // Footer
+  doc.setFillColor(BLUE[0], BLUE[1], BLUE[2]);
+  doc.rect(0, 287, W, 10, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.text(TITOLO_INTESTAZIONE + " - " + CFG.footer_note, W / 2, 293, { align: "center" });
+
+  doc.save(nomeFile.replace(".pdf", "_ANALISI.pdf"));
+}
+
+function hexToRgb(hex) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [30, 41, 59];
+}
+
+// ═══════════════════════════════════════════════════
+//  ARCHIVIO (dati da GitHub)
+// ═══════════════════════════════════════════════════
+const SEZIONI_PIPELINE = [
+  { titolo: "Identificazione", campi: [
+    ["nome_scuola_meccanografico", "Ente / Cod. Meccanografico"],
+    ["stazione_appaltante",       "Stazione Appaltante"],
+    ["piattaforma_pubblicazione", "Piattaforma di Pubblicazione"],
+    ["cup_codice_progetto",       "CUP / Codice Progetto"],
+    ["aree_tematiche",            "Aree Tematiche"],
+    ["sotto_categorie_merceologiche", "Sotto-categorie Merceologiche"],
+  ]},
+  { titolo: "Date e Scadenze", campi: [
+    ["inizio_procedura",                "Inizio Procedura"],
+    ["scadenza_procedura",              "Scadenza Procedura"],
+    ["chiusura_richiesta_chiarimenti",  "Chiusura Rich. Chiarimenti"],
+    ["data_limite_consegna_beni",       "Data Limite Consegna"],
+  ]},
+  { titolo: "Condizioni di Gara", campi: [
+    ["criterio_aggiudicazione",              "Criterio Aggiudicazione"],
+    ["numero_lotti",                         "Numero Lotti"],
+    ["partecipazione_piu_lotti",             "Partecipazione a Piu Lotti"],
+    ["consegne_parziali",                    "Consegne Parziali"],
+    ["garanzia_provvisoria_definitiva_anac", "Garanzia Provv./Defin. ANAC"],
+    ["garanzia_cauzione_provvisoria",        "Garanzia / Cauzione Provvisoria"],
+    ["contributo_anac",                      "Contributo Gara ANAC"],
+    ["imposta_bollo_partecipazione",         "Imposta di Bollo Partecipazione"],
+  ]},
+  { titolo: "Requisiti Tecnici", campi: [
+    ["prestazioni_richieste",                      "Prestazioni Richieste"],
+    ["installazione_beni",                         "Installazione dei Beni"],
+    ["luogo_consegna",                             "Luogo di Consegna"],
+    ["requisiti_capacita_tecnica_professionale",   "Requisiti Capacita Tecnica"],
+    ["certificazioni_beni",                        "Certificazioni Beni"],
+    ["checklist_dnsh_cam",                         "Checklist DNSH / Certificati CAM"],
+  ]},
+  { titolo: "Documentazione", campi: [
+    ["elenco_documenti",                           "Elenco Documenti da Compilare"],
+  ]},
+  { titolo: "Obblighi Post-Aggiudicazione", campi: [
+    ["garanzia_minima_obbligatoria",  "Garanzia Minima Obbligatoria"],
+    ["garanzia_come_criterio_premiale","Garanzia Criterio Premiale"],
+    ["assistenza",                    "Assistenza Tecnica"],
+    ["formazione",                    "Formazione"],
+    ["penali",                        "Penali"],
+    ["altri_servizi_richiesti",       "Altri Servizi / Obblighi"],
+    ["valore_appalto",                "Valore dell'Appalto"],
+  ]},
+];
+
+let archivioData = null;
+let archivioCache = {};      // id -> dati completi
+let archivioFiltrate = [];   // gare filtrate
+let archivioSelezionato = null;
+let confrontoSelezione = [];  // indici gare selezionate per confronto
+let tabCorrente = "sessione";
+let vistaArchivio = "overview"; // "overview" | "statistiche"
+let scoreConfig = null;  // caricato da GitHub
+
+// ═══════════════════════════════════════════════════
+//  SCORING FATTIBILITA
+// ═══════════════════════════════════════════════════
+
+const SCORE_CONFIG_DEFAULT = {
+  peso_copertura: 50,
+  peso_criticita: 50,
+  fattori_criticita: {
+    criterio_aggiudicazione: { peso: 15 },
+    penali: { peso: 15 },
+    tempi_consegna: { peso: 15 },
+    requisiti_tecnici: { peso: 15 },
+    complessita_consegna: { peso: 10 },
+    costi_partecipazione: { peso: 10 },
+    garanzia_obbligatoria: { peso: 10 },
+    subappalto: { peso: 10 },
+  },
+  fattori_copertura: {
+    copertura_sotto_categorie: { peso: 40 },
+    marchi_in_catalogo: { peso: 30 },
+    profondita_catalogo: { peso: 20 },
+    compatibilita_importo: { peso: 10 },
+  },
+  fasce_score: {
+    A: { min: 80, max: 100, label: "Molto adatta — partecipazione raccomandata", colore: "#2E7D32" },
+    B: { min: 60, max: 79, label: "Buona opportunità — criticità gestibili", colore: "#558B2F" },
+    C: { min: 40, max: 59, label: "Fattibile con riserve — valutare", colore: "#F57F17" },
+    D: { min: 20, max: 39, label: "Criticità importanti — sconsigliata", colore: "#E65100" },
+    E: { min: 0, max: 19, label: "Non adatta al catalogo", colore: "#C62828" },
+  },
+  // Numero medio di prodotti per sotto-categoria che vale "profondità 100/100"
+  profondita_riferimento: 10,
+};
+
+async function caricaScoreConfig() {
+  if (scoreConfig) return scoreConfig;
+  let fileConf = {};
+  try {
+    const resp = await fetch(CFG.score_config_url);
+    if (resp.ok) fileConf = await resp.json();
+  } catch (e) { /* fallback ai valori predefiniti */ }
+  // Unione: i valori del file sovrascrivono i predefiniti (stessa logica dello script desktop)
+  const conf = JSON.parse(JSON.stringify(SCORE_CONFIG_DEFAULT));
+  for (const [k, v] of Object.entries(fileConf)) {
+    if (v && typeof v === "object" && !Array.isArray(v) && conf[k] && typeof conf[k] === "object") Object.assign(conf[k], v);
+    else conf[k] = v;
+  }
+  // Conteggi per sotto-categoria e marchi: dal catalogo prodotti (stesso file dello script desktop)
+  try { await caricaIndiceProdotti(); } catch (e) { /* catalogo assente: profondità = 0 */ }
+  conf.prodotti_per_sotto_categoria = catalogoInfo.conteggi;
+  scoreConfig = conf;
+  return scoreConfig;
+}
+
+function getConf() { return scoreConfig || SCORE_CONFIG_DEFAULT; }
+
+/* ── Calcolo criticità operative (0-100, alto = poche criticità) ── */
+function calcolaCriticita(dati) {
+  const NF = NOT_FOUND;
+  const conf = getConf().fattori_criticita;
+  const fattori = {};
+
+  // 1. Criterio aggiudicazione (OEPV = buono, minor prezzo = male)
+  const crit = (dati.criterio_aggiudicazione || NF).toLowerCase();
+  if (crit === NF.toLowerCase()) fattori.criterio_aggiudicazione = 50;
+  else if (crit.includes("oepv") || crit.includes("offerta economicamente")) fattori.criterio_aggiudicazione = 90;
+  else if (crit.includes("minor prezzo") || crit.includes("prezzo più basso")) fattori.criterio_aggiudicazione = 25;
+  else fattori.criterio_aggiudicazione = 60;
+
+  // 2. Penali
+  const pen = (dati.penali || NF).toLowerCase();
+  if (pen === NF.toLowerCase() || pen.includes("non previste") || pen.includes("non specificat")) fattori.penali = 80;
+  else if (pen.includes("tetto") || pen.includes("massimo") || pen.includes("max")) fattori.penali = 60;
+  else if (pen.includes("1%") || pen.includes("0,")) fattori.penali = 70;
+  else fattori.penali = 35;
+
+  // 3. Tempi consegna
+  const tempi = dati.data_limite_consegna_beni || NF;
+  const ggMatch = tempi.match(/(\d+)\s*giorn/i);
+  if (ggMatch) {
+    const gg = parseInt(ggMatch[1]);
+    if (gg >= 60) fattori.tempi_consegna = 90;
+    else if (gg >= 30) fattori.tempi_consegna = 60;
+    else fattori.tempi_consegna = 25;
+  } else fattori.tempi_consegna = 60; // non specificato = neutro
+
+  // 4. Requisiti tecnici
+  const req = (dati.requisiti_capacita_tecnica_professionale || NF).toLowerCase();
+  if (req === NF.toLowerCase()) fattori.requisiti_tecnici = 70;
+  else if (req.includes("fatturato") && (req.includes("milion") || req.match(/\d{3}\.?\d{3}/))) fattori.requisiti_tecnici = 25;
+  else if (req.includes("certificazion") || req.includes("iso")) fattori.requisiti_tecnici = 45;
+  else fattori.requisiti_tecnici = 70;
+
+  // 5. Complessità consegna
+  const luogo = (dati.luogo_consegna || NF).toLowerCase();
+  if (luogo.includes("plesso unico") || luogo.includes("unico")) fattori.complessita_consegna = 90;
+  else if (luogo.includes("più plessi") || luogo.includes("piu plessi")) fattori.complessita_consegna = 35;
+  else fattori.complessita_consegna = 65;
+
+  // 6. Costi partecipazione (cauzione + ANAC + bollo)
+  const cauzione = (dati.garanzia_cauzione_provvisoria || "").toLowerCase();
+  const anac = (dati.contributo_anac || "").toLowerCase();
+  const bollo = (dati.imposta_bollo_partecipazione || "").toLowerCase();
+  let costiCount = 0;
+  if (cauzione.startsWith("s")) costiCount++;
+  if (anac.startsWith("s")) costiCount++;
+  if (bollo.startsWith("s")) costiCount++;
+  fattori.costi_partecipazione = costiCount === 0 ? 90 : costiCount === 1 ? 70 : costiCount === 2 ? 50 : 30;
+
+  // 7. Garanzia obbligatoria
+  const gar = (dati.garanzia_minima_obbligatoria || NF).toLowerCase();
+  if (gar === NF.toLowerCase() || gar.includes("non")) fattori.garanzia_obbligatoria = 85;
+  else if (gar.includes("24") || gar.includes("12")) fattori.garanzia_obbligatoria = 70;
+  else if (gar.includes("36")) fattori.garanzia_obbligatoria = 50;
+  else if (gar.includes("48") || gar.includes("60")) fattori.garanzia_obbligatoria = 25;
+  else fattori.garanzia_obbligatoria = 55;
+
+  // 8. Subappalto
+  const sub = (dati.subappalto || dati.altri_servizi_richiesti || NF).toLowerCase();
+  if (sub.includes("non ammesso") || sub.includes("non consentito") || sub.includes("vietato")) fattori.subappalto = 30;
+  else fattori.subappalto = 80;
+
+  // Media pesata
+  let somma = 0, pesoTot = 0;
+  for (const [k, v] of Object.entries(fattori)) {
+    const p = conf[k]?.peso || 10;
+    somma += v * p;
+    pesoTot += p;
+  }
+  const score = pesoTot > 0 ? Math.round(somma / pesoTot) : 50;
+  return { score, fattori };
+}
+
+/* ── Calcolo copertura prodotti (0-100) ── */
+function calcolaCopertura(dati) {
+  const conf = getConf();
+  const confCop = conf.fattori_copertura;
+  const catalogo = conf.prodotti_per_sotto_categoria || {};
+  const catalogoKeys = Object.keys(catalogo);
+  const fattori = {};
+
+  // Sotto-categorie della gara
+  const scRaw = dati.sotto_categorie_merceologiche || "";
+  const garaSottoCat = scRaw && scRaw !== NOT_FOUND
+    ? scRaw.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+  if (garaSottoCat.length === 0) {
+    // Fallback su aree tematiche
+    return { score: 50, fattori: {
+      copertura_sotto_categorie: 50,
+      marchi_in_catalogo: 50,
+      profondita_catalogo: 50,
+      compatibilita_importo: 50,
+    }, note: "Sotto-categorie non disponibili — score stimato" };
+  }
+
+  // 1. Copertura sotto-categorie: quante delle richieste sono nel catalogo?
+  //    (espansione tramite mappa opzionale, identica allo script desktop)
+  const MAPPA = mappaSottoCategorie();
+  const espanse = [];
+  for (const sc of garaSottoCat) {
+    const m = MAPPA[sc.toLowerCase()];
+    for (const x of (m || [sc])) if (!espanse.includes(x)) espanse.push(x);
+  }
+  const coperte = espanse.filter(sc => catalogoKeys.some(k => k.toLowerCase() === sc.toLowerCase()));
+  fattori.copertura_sotto_categorie = espanse.length > 0
+    ? Math.round((coperte.length / espanse.length) * 100)
+    : 40;
+
+  // 2. Marchi in catalogo (se il bando cita marchi e noi li abbiamo)
+  const marche = dati.marche_specifiche || dati.categorie_prodotti || NOT_FOUND;
+  if (marche === NOT_FOUND || !marche) {
+    fattori.marchi_in_catalogo = 70; // nessun vincolo = positivo
+  } else {
+    // Euristico: marchi citati dalla gara presenti nel catalogo
+    const marcheLower = marche.toLowerCase();
+    const trovati = (catalogoInfo.marchi || []).filter(b => marcheLower.includes(b));
+    const totMenzionati = marche.split(",").filter(s => s.trim().length > 2).length || 1;
+    fattori.marchi_in_catalogo = Math.min(100, Math.round((trovati.length / totMenzionati) * 100));
+  }
+
+  // 3. Profondità catalogo: media prodotti per sotto-categoria coperta
+  if (coperte.length > 0) {
+    const mediaProdotti = coperte.reduce((sum, sc) => {
+      const key = catalogoKeys.find(k => k.toLowerCase() === sc.toLowerCase());
+      return sum + (key ? catalogo[key] : 0);
+    }, 0) / coperte.length;
+    // profondita_riferimento prodotti medi per sotto-categoria = 100/100
+    const rif = Math.max(1, parseInt(conf.profondita_riferimento || 10));
+    fattori.profondita_catalogo = Math.min(100, Math.round(mediaProdotti / rif * 100));
+  } else {
+    fattori.profondita_catalogo = 10;
+  }
+
+  // 4. Compatibilità importo (euristico su range prezzi)
+  fattori.compatibilita_importo = 70; // default neutro-positivo
+
+  // Media pesata
+  let somma = 0, pesoTot = 0;
+  for (const [k, v] of Object.entries(fattori)) {
+    const p = confCop[k]?.peso || 10;
+    somma += v * p;
+    pesoTot += p;
+  }
+  const score = pesoTot > 0 ? Math.round(somma / pesoTot) : 50;
+  return { score, fattori };
+}
+
+/* ── Score finale A-E ── */
+function calcolaScore(dati) {
+  const conf = getConf();
+  const crit = calcolaCriticita(dati);
+  const cop = calcolaCopertura(dati);
+  const finale = Math.round(
+    (crit.score * conf.peso_criticita + cop.score * conf.peso_copertura) /
+    (conf.peso_criticita + conf.peso_copertura)
+  );
+
+  const fasce = conf.fasce_score;
+  let lettera = "C";
+  let fascia = fasce.C;
+  for (const [l, f] of Object.entries(fasce)) {
+    if (finale >= f.min && finale <= f.max) {
+      lettera = l;
+      fascia = f;
+      break;
+    }
+  }
+
+  return { lettera, finale, fascia, criticita: crit, copertura: cop };
+}
+
+/* ── HTML sezione fattibilità nel dettaglio gara ── */
+function renderScoreSection(dati) {
+  const sc = calcolaScore(dati);
+  const conf = getConf();
+  const fasciaDesc = {
+    criterio_aggiudicazione: "Criterio di aggiudicazione",
+    penali: "Penali contrattuali",
+    tempi_consegna: "Tempi di consegna",
+    requisiti_tecnici: "Requisiti tecnici/professionali",
+    complessita_consegna: "Complessità consegna (plessi)",
+    costi_partecipazione: "Costi di partecipazione",
+    garanzia_obbligatoria: "Garanzia obbligatoria",
+    subappalto: "Subappalto ammesso",
+  };
+  const copDesc = {
+    copertura_sotto_categorie: "Copertura sotto-categorie",
+    marchi_in_catalogo: "Marchi richiesti in catalogo",
+    profondita_catalogo: "Profondità gamma prodotti",
+    compatibilita_importo: "Compatibilità importo",
+  };
+
+  function dotColor(val) {
+    if (val >= 70) return "#2E7D32";
+    if (val >= 45) return "#F57F17";
+    return "#C62828";
+  }
+
+  function renderFattori(fattori, labels) {
+    return Object.entries(fattori).map(([k, v]) => `
+      <div class="score-factor">
+        <div class="score-factor-dot" style="background:${dotColor(v)}"></div>
+        <div class="score-factor-name">${labels[k] || k}</div>
+        <div class="score-factor-val" style="color:${dotColor(v)}">${v}/100</div>
+      </div>`).join("");
+  }
+
+  const noteHtml = sc.copertura.note
+    ? `<div style="font-size:11px; color:var(--gray); font-style:italic; margin-top:8px;">${sc.copertura.note}</div>`
+    : "";
+
+  return `
+    <div class="score-section">
+      <div class="score-header">
+        <div class="score-header-letter" style="background:${sc.fascia.colore}">${sc.lettera}</div>
+        <div class="score-header-info">
+          <div class="score-header-title">Score Fattibilità: ${sc.finale}/100</div>
+          <div class="score-header-desc">${sc.fascia.label}</div>
+        </div>
+        <button class="pesi-btn pesi-btn-secondary" style="font-size:11px; padding:6px 12px;"
+                onclick="mostraPesiModal()">Configura pesi</button>
+      </div>
+      <div class="score-body">
+        <div class="score-dimension">
+          <div class="score-dim-header">
+            <div class="score-dim-title">Criticità operative (${conf.peso_criticita}%)</div>
+            <div class="score-dim-value" style="color:${dotColor(sc.criticita.score)}">${sc.criticita.score}/100</div>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:${sc.criticita.score}%; background:${dotColor(sc.criticita.score)}"></div>
+          </div>
+          ${renderFattori(sc.criticita.fattori, fasciaDesc)}
+        </div>
+        <div class="score-dimension">
+          <div class="score-dim-header">
+            <div class="score-dim-title">Copertura prodotti (${conf.peso_copertura}%)</div>
+            <div class="score-dim-value" style="color:${dotColor(sc.copertura.score)}">${sc.copertura.score}/100</div>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:${sc.copertura.score}%; background:${dotColor(sc.copertura.score)}"></div>
+          </div>
+          ${renderFattori(sc.copertura.fattori, copDesc)}
+          ${noteHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Badge score per le card overview ── */
+function renderScoreBadge(dati, small) {
+  const sc = calcolaScore(dati);
+  const cls = small ? "score-badge score-badge-sm" : "score-badge";
+  return `<div class="${cls}" style="background:${sc.fascia.colore}" title="Score: ${sc.finale}/100 — ${sc.fascia.label}">${sc.lettera}</div>`;
+}
+
+/* ── Modal configurazione pesi ── */
+function mostraPesiModal() {
+  const conf = getConf();
+  const critKeys = Object.keys(conf.fattori_criticita);
+  const copKeys = Object.keys(conf.fattori_copertura);
+
+  const critDesc = {
+    criterio_aggiudicazione: "Criterio di aggiudicazione",
+    penali: "Penali contrattuali",
+    tempi_consegna: "Tempi di consegna",
+    requisiti_tecnici: "Requisiti tecnici",
+    complessita_consegna: "Complessità consegna",
+    costi_partecipazione: "Costi partecipazione",
+    garanzia_obbligatoria: "Garanzia obbligatoria",
+    subappalto: "Subappalto",
+  };
+  const copDesc = {
+    copertura_sotto_categorie: "Copertura sotto-categorie",
+    marchi_in_catalogo: "Marchi in catalogo",
+    profondita_catalogo: "Profondità catalogo",
+    compatibilita_importo: "Compatibilità importo",
+  };
+
+  function renderSliders(keys, section, labels) {
+    return keys.map(k => {
+      const peso = conf[section][k].peso;
+      return `<div class="pesi-row">
+        <label>${labels[k] || k}</label>
+        <input type="range" min="0" max="30" value="${peso}"
+               oninput="this.nextElementSibling.textContent=this.value"
+               data-section="${section}" data-key="${k}">
+        <div class="pesi-val">${peso}</div>
+      </div>`;
+    }).join("");
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "pesi-modal-overlay";
+  overlay.id = "pesi-modal";
+  overlay.innerHTML = `
+    <div class="pesi-modal">
+      <h3>Configurazione Pesi Score</h3>
+      <p>Modifica i pesi di ciascun fattore. I punteggi di tutte le gare verranno ricalcolati automaticamente.</p>
+      <div class="pesi-row">
+        <label><strong>Peso Criticità Operative</strong></label>
+        <input type="range" min="0" max="100" value="${conf.peso_criticita}"
+               oninput="this.nextElementSibling.textContent=this.value" data-key="peso_criticita">
+        <div class="pesi-val">${conf.peso_criticita}</div>
+      </div>
+      <div class="pesi-row">
+        <label><strong>Peso Copertura Prodotti</strong></label>
+        <input type="range" min="0" max="100" value="${conf.peso_copertura}"
+               oninput="this.nextElementSibling.textContent=this.value" data-key="peso_copertura">
+        <div class="pesi-val">${conf.peso_copertura}</div>
+      </div>
+      <div class="pesi-group-title">Fattori Criticità</div>
+      ${renderSliders(critKeys, "fattori_criticita", critDesc)}
+      <div class="pesi-group-title">Fattori Copertura</div>
+      ${renderSliders(copKeys, "fattori_copertura", copDesc)}
+      <div class="pesi-actions">
+        <button class="pesi-btn pesi-btn-secondary" onclick="chiudiPesiModal()">Annulla</button>
+        <button class="pesi-btn pesi-btn-primary" onclick="salvaPesi()">Applica e ricalcola</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function chiudiPesiModal() {
+  const m = document.getElementById("pesi-modal");
+  if (m) m.remove();
+}
+
+function salvaPesi() {
+  const conf = getConf();
+  const modal = document.getElementById("pesi-modal");
+  modal.querySelectorAll("input[type=range]").forEach(inp => {
+    const section = inp.dataset.section;
+    const key = inp.dataset.key;
+    const val = parseInt(inp.value);
+    if (section && key) {
+      conf[section][key].peso = val;
+    } else if (key === "peso_criticita") {
+      conf.peso_criticita = val;
+    } else if (key === "peso_copertura") {
+      conf.peso_copertura = val;
+    }
+  });
+  scoreConfig = conf;
+  chiudiPesiModal();
+  // Ricalcola vista corrente
+  if (archivioSelezionato !== null) {
+    mostraDettaglioArchivio(archivioSelezionato);
+  } else {
+    mostraArchivioOverview();
+  }
+}
+
+function switchTab(tab) {
+  tabCorrente = tab;
+  document.getElementById("tab-sessione").classList.toggle("active", tab === "sessione");
+  document.getElementById("tab-archivio").classList.toggle("active", tab === "archivio");
+  document.getElementById("sidebar-sessione").classList.toggle("hidden", tab !== "sessione");
+  document.getElementById("sidebar-archivio").classList.toggle("hidden", tab !== "archivio");
+
+  if (tab === "archivio") {
+    if (!archivioData) {
+      caricaArchivio();
+    } else {
+      mostraArchivioOverview();
+    }
+  }
+}
+
+function estraiChiaveEnte(gara) {
+  // Estrai codice meccanografico (es. RMTF090003) dal nome_ente o dall'id
+  const testo = (gara.nome_ente || "") + " " + (gara.id || "");
+  const match = testo.match(/\b([A-Za-z]{4}\d{5}[A-Za-z0-9])\b/);
+  if (match) return match[1].toUpperCase();
+  // Fallback: slug dell'ente dall'ID (parte dopo la data e "Disciplinare-Gara_")
+  const slug = (gara.id || "").replace(/^\d{8}_Disciplinare-Gara_/, "").toUpperCase();
+  return slug || gara.id;
+}
+
+function deduplicaGare(gare) {
+  const mappa = new Map();
+  for (const g of gare) {
+    const chiave = estraiChiaveEnte(g);
+    const esistente = mappa.get(chiave);
+    if (!esistente || (g.data_elaborazione > esistente.data_elaborazione)) {
+      mappa.set(chiave, g);
+    }
+  }
+  return [...mappa.values()].sort((a, b) => b.data_elaborazione.localeCompare(a.data_elaborazione));
+}
+
+async function caricaArchivio() {
+  const list = document.getElementById("archive-list");
+  list.innerHTML = '<div class="sidebar-loading">Caricamento archivio...</div>';
+
+  try {
+    // Carica config score in parallelo con l'indice
+    const [resp] = await Promise.all([
+      fetch("data/index.json"),
+      caricaScoreConfig(),
+    ]);
+    if (!resp.ok) throw new Error("Archivio non ancora disponibile");
+    archivioData = await resp.json();
+
+    // Deduplica gare: tiene solo la versione più recente per lo stesso ente
+    archivioData.gare = deduplicaGare(archivioData.gare);
+
+    // Carica tutti i JSON in parallelo per ricerca full-text
+    await Promise.all(archivioData.gare.map(async g => {
+      try {
+        const r = await fetch("data/gare/" + g.file);
+        if (r.ok) archivioCache[g.id] = await r.json();
+      } catch (_) {}
+    }));
+
+    archivioFiltrate = [...archivioData.gare];
+    mostraArchivioLista();
+    mostraArchivioOverview();
+  } catch (e) {
+    list.innerHTML = `<div class="sidebar-empty">${escHtml(e.message)}</div>`;
+  }
+}
+
+// ── HELPER: PARSING E CLASSIFICAZIONE ────────────
+
+// Mappa province italiane (sigla meccanografico → [provincia, regione])
+const PROVINCE_REGIONE = {
+  AG:["Agrigento","Sicilia"],AL:["Alessandria","Piemonte"],AN:["Ancona","Marche"],AO:["Aosta","Valle d'Aosta"],
+  AP:["Ascoli Piceno","Marche"],AQ:["L'Aquila","Abruzzo"],AR:["Arezzo","Toscana"],AT:["Asti","Piemonte"],
+  AV:["Avellino","Campania"],BA:["Bari","Puglia"],BG:["Bergamo","Lombardia"],BI:["Biella","Piemonte"],
+  BL:["Belluno","Veneto"],BN:["Benevento","Campania"],BO:["Bologna","Emilia-Romagna"],BR:["Brindisi","Puglia"],
+  BS:["Brescia","Lombardia"],BT:["Barletta-Andria-Trani","Puglia"],BZ:["Bolzano","Trentino-Alto Adige"],
+  CA:["Cagliari","Sardegna"],CB:["Campobasso","Molise"],CE:["Caserta","Campania"],CH:["Chieti","Abruzzo"],
+  CL:["Caltanissetta","Sicilia"],CN:["Cuneo","Piemonte"],CO:["Como","Lombardia"],CR:["Cremona","Lombardia"],
+  CS:["Cosenza","Calabria"],CT:["Catania","Sicilia"],CZ:["Catanzaro","Calabria"],EN:["Enna","Sicilia"],
+  FC:["Forli-Cesena","Emilia-Romagna"],FE:["Ferrara","Emilia-Romagna"],FG:["Foggia","Puglia"],
+  FI:["Firenze","Toscana"],FM:["Fermo","Marche"],FR:["Frosinone","Lazio"],GE:["Genova","Liguria"],
+  GO:["Gorizia","Friuli Venezia Giulia"],GR:["Grosseto","Toscana"],IM:["Imperia","Liguria"],
+  IS:["Isernia","Molise"],KR:["Crotone","Calabria"],LC:["Lecco","Lombardia"],LE:["Lecce","Puglia"],
+  LI:["Livorno","Toscana"],LO:["Lodi","Lombardia"],LT:["Latina","Lazio"],LU:["Lucca","Toscana"],
+  MB:["Monza e Brianza","Lombardia"],MC:["Macerata","Marche"],ME:["Messina","Sicilia"],MI:["Milano","Lombardia"],
+  MN:["Mantova","Lombardia"],MO:["Modena","Emilia-Romagna"],MS:["Massa-Carrara","Toscana"],
+  MT:["Matera","Basilicata"],NA:["Napoli","Campania"],NO:["Novara","Piemonte"],NU:["Nuoro","Sardegna"],
+  OR:["Oristano","Sardegna"],PA:["Palermo","Sicilia"],PC:["Piacenza","Emilia-Romagna"],PD:["Padova","Veneto"],
+  PE:["Pescara","Abruzzo"],PG:["Perugia","Umbria"],PI:["Pisa","Toscana"],PN:["Pordenone","Friuli Venezia Giulia"],
+  PO:["Prato","Toscana"],PR:["Parma","Emilia-Romagna"],PT:["Pistoia","Toscana"],PU:["Pesaro e Urbino","Marche"],
+  PV:["Pavia","Lombardia"],PZ:["Potenza","Basilicata"],RA:["Ravenna","Emilia-Romagna"],
+  RC:["Reggio Calabria","Calabria"],RE:["Reggio Emilia","Emilia-Romagna"],RG:["Ragusa","Sicilia"],
+  RI:["Rieti","Lazio"],RM:["Roma","Lazio"],RN:["Rimini","Emilia-Romagna"],RO:["Rovigo","Veneto"],
+  SA:["Salerno","Campania"],SI:["Siena","Toscana"],SO:["Sondrio","Lombardia"],SP:["La Spezia","Liguria"],
+  SR:["Siracusa","Sicilia"],SS:["Sassari","Sardegna"],SU:["Sud Sardegna","Sardegna"],SV:["Savona","Liguria"],
+  TA:["Taranto","Puglia"],TE:["Teramo","Abruzzo"],TN:["Trento","Trentino-Alto Adige"],TO:["Torino","Piemonte"],
+  TP:["Trapani","Sicilia"],TR:["Terni","Umbria"],TS:["Trieste","Friuli Venezia Giulia"],TV:["Treviso","Veneto"],
+  UD:["Udine","Friuli Venezia Giulia"],VA:["Varese","Lombardia"],VB:["Verbano-Cusio-Ossola","Piemonte"],
+  VC:["Vercelli","Piemonte"],VE:["Venezia","Veneto"],VI:["Vicenza","Veneto"],VR:["Verona","Veneto"],
+  VT:["Viterbo","Lazio"],VV:["Vibo Valentia","Calabria"],
+};
+
+const FASCE_IMPORTO = [
+  ["< 50.000 \u20ac", 0, 50000],
+  ["50.000 - 100.000 \u20ac", 50000, 100000],
+  ["100.000 - 250.000 \u20ac", 100000, 250000],
+  ["250.000 - 500.000 \u20ac", 250000, 500000],
+  ["> 500.000 \u20ac", 500000, Infinity],
+];
+
+function estraiImporto(text) {
+  if (!text || text === NOT_FOUND) return null;
+  const matches = text.match(/[\d.]+,\d{2}/g);
+  if (!matches) return null;
+  const values = matches.map(m => parseFloat(m.replace(/\./g, "").replace(",", ".")));
+  return Math.max(...values);
+}
+
+function estraiLocalita(dati) {
+  // Cerca in meccanografico + stazione appaltante
+  const campi = [dati.nome_scuola_meccanografico || "", dati.stazione_appaltante || ""].join(" ");
+
+  // 1. Codice meccanografico (case-insensitive, ultimo char alfanumerico)
+  const mec = campi.match(/\b([A-Za-z]{2})[A-Za-z]{2}\d{5}[A-Za-z0-9]\b/);
+  if (mec) {
+    const sigla = mec[1].toUpperCase();
+    const info = PROVINCE_REGIONE[sigla];
+    if (info) return { provincia: info[0], regione: info[1], sigla };
+  }
+
+  // 2. Fallback: cerca sigla provincia tra parentesi es. "(PA)", "(RM)", "(GE)"
+  const paren = campi.match(/\(([A-Z]{2})\)/);
+  if (paren) {
+    const info = PROVINCE_REGIONE[paren[1]];
+    if (info) return { provincia: info[0], regione: info[1], sigla: paren[1] };
+  }
+
+  // 3. Fallback: cerca "PROV. XX" o "Provincia di Xxx" nel testo
+  const provAbbr = campi.match(/PROV\.?\s*([A-Z]{2})\b/);
+  if (provAbbr) {
+    const info = PROVINCE_REGIONE[provAbbr[1]];
+    if (info) return { provincia: info[0], regione: info[1], sigla: provAbbr[1] };
+  }
+  const provNome = campi.match(/[Pp]rovincia\s+di\s+([A-Za-z\s]+?)[\s,\-\.]/);
+  if (provNome) {
+    const nome = provNome[1].trim();
+    for (const [sig, [prov, reg]] of Object.entries(PROVINCE_REGIONE)) {
+      if (prov.toLowerCase() === nome.toLowerCase()) return { provincia: prov, regione: reg, sigla: sig };
+    }
+  }
+
+  return null;
+}
+
+function classificaAree(dati) {
+  const campo = dati.aree_tematiche;
+  if (!campo || campo === NOT_FOUND) return [];
+  return campo.split(",").map(a => a.trim()).filter(a => a.length > 0);
+}
+
+function estraiNumeroLotti(dati) {
+  const v = dati.numero_lotti || "";
+  if (!v || v === NOT_FOUND) return null;
+  const m = v.match(/\d+/);
+  return m ? parseInt(m[0]) : null;
+}
+
+// ── RICERCA E FILTRI ─────────────────────────────
+function filtraArchivio() {
+  if (!archivioData) return;
+
+  const searchText  = (document.getElementById("archive-search")?.value || "").toLowerCase().trim();
+  const filtroCrit  = document.getElementById("filtro-criterio")?.value || "";
+  const filtroArea  = document.getElementById("filtro-area")?.value || "";
+  const filtroFascia = document.getElementById("filtro-fascia")?.value || "";
+  const filtroLotti = document.getElementById("filtro-lotti")?.value || "";
+  const filtroReg   = document.getElementById("filtro-regione")?.value || "";
+  const filtroProv  = document.getElementById("filtro-provincia")?.value || "";
+  const filtroDa    = document.getElementById("filtro-data-da")?.value || "";
+  const filtroA     = document.getElementById("filtro-data-a")?.value || "";
+
+  archivioFiltrate = archivioData.gare.filter(g => {
+    const dati = archivioCache[g.id];
+    if (!dati) return !searchText; // senza cache, mostra solo se nessuna ricerca
+
+    // Full-text search
+    if (searchText) {
+      const allText = Object.values(dati).join(" ").toLowerCase();
+      if (!allText.includes(searchText)) return false;
+    }
+
+    // Criterio aggiudicazione
+    if (filtroCrit) {
+      const criterio = (dati.criterio_aggiudicazione || "").toLowerCase();
+      if (filtroCrit === "OEPV" && !criterio.includes("oepv") && !criterio.includes("offerta economicamente")) return false;
+      if (filtroCrit === "Minor prezzo" && !criterio.includes("minor prezzo") && !criterio.includes("prezzo pi")) return false;
+      if (filtroCrit !== "OEPV" && filtroCrit !== "Minor prezzo" && !criterio.includes(filtroCrit.toLowerCase())) return false;
+    }
+
+    // Area tematica
+    if (filtroArea) {
+      const aree = classificaAree(dati);
+      if (!aree.includes(filtroArea)) return false;
+    }
+
+    // Fascia importo
+    if (filtroFascia) {
+      const importo = estraiImporto(dati.valore_appalto);
+      if (importo === null) return false;
+      const fascia = FASCE_IMPORTO[parseInt(filtroFascia)];
+      if (!fascia || importo < fascia[1] || importo >= fascia[2]) return false;
+    }
+
+    // Numero lotti
+    if (filtroLotti) {
+      const nLotti = estraiNumeroLotti(dati);
+      if (nLotti === null) return false;
+      if (filtroLotti === "1" && nLotti !== 1) return false;
+      if (filtroLotti === "2-3" && (nLotti < 2 || nLotti > 3)) return false;
+      if (filtroLotti === "4-5" && (nLotti < 4 || nLotti > 5)) return false;
+      if (filtroLotti === "6+" && nLotti < 6) return false;
+    }
+
+    // Regione
+    if (filtroReg) {
+      const loc = estraiLocalita(dati);
+      if (!loc || loc.regione !== filtroReg) return false;
+    }
+
+    // Provincia
+    if (filtroProv) {
+      const loc = estraiLocalita(dati);
+      if (!loc || loc.provincia !== filtroProv) return false;
+    }
+
+    // Date elaborazione
+    if (filtroDa && g.data_elaborazione < filtroDa) return false;
+    if (filtroA && g.data_elaborazione > filtroA) return false;
+
+    return true;
+  });
+
+  archivioSelezionato = null;
+  mostraArchivioLista();
+  if (vistaArchivio === "statistiche") mostraStatistiche();
+  else mostraArchivioOverview();
+}
+
+function resetFiltri() {
+  ["archive-search","filtro-criterio","filtro-area","filtro-fascia","filtro-lotti",
+   "filtro-regione","filtro-provincia","filtro-data-da","filtro-data-a"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  filtraArchivio();
+}
+
+// ── SIDEBAR: LISTA ARCHIVIO FILTRATA ─────────────
+function mostraArchivioLista() {
+  const list = document.getElementById("archive-list");
+  if (!archivioFiltrate || archivioFiltrate.length === 0) {
+    list.innerHTML = '<div class="sidebar-empty">Nessuna gara trovata.</div>';
+    return;
+  }
+
+  list.innerHTML = archivioFiltrate.map(g => {
+    const origIdx = archivioData.gare.indexOf(g);
+    const dati = archivioCache[g.id] || {};
+    const nome = g.nome_ente.split("\u2014")[0].split(",")[0].trim();
+    const nomeCorto = nome.length > 35 ? nome.slice(0, 35) + "..." : nome;
+    const importo = estraiImporto(dati.valore_appalto);
+    const importoFmt = importo ? "\u20ac " + importo.toLocaleString("it-IT", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : null;
+
+    return `
+    <div class="archive-item ${archivioSelezionato === origIdx ? 'active' : ''}"
+         onclick="mostraDettaglioArchivio(${origIdx})">
+      <div class="archive-item-name">${escHtml(nomeCorto)}</div>
+      <div class="archive-item-meta">${g.campi_compilati}/${TOTALE_CAMPI_PIPELINE} campi \u00b7 ${g.data_elaborazione}</div>
+      ${importoFmt ? `<div class="archive-item-importo">${importoFmt}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+// ── MAIN AREA: OVERVIEW CON FILTRI E CARD ────────
+// ── PANNELLO FILTRI (riutilizzabile) ──────────────
+function generaFiltriHtml() {
+  const criteriSet = new Set();
+  const regioniSet = new Set();
+  const provinceSet = new Set();
+
+  for (const g of archivioData.gare) {
+    const dati = archivioCache[g.id];
+    if (!dati) continue;
+    const c = (dati.criterio_aggiudicazione || "").toLowerCase();
+    if (c && c !== NOT_FOUND.toLowerCase()) {
+      if (c.includes("oepv") || c.includes("offerta economicamente")) criteriSet.add("OEPV");
+      else if (c.includes("minor prezzo") || c.includes("prezzo pi")) criteriSet.add("Minor prezzo");
+      else criteriSet.add(dati.criterio_aggiudicazione.slice(0, 40));
+    }
+    const loc = estraiLocalita(dati);
+    if (loc) { regioniSet.add(loc.regione); provinceSet.add(loc.provincia); }
+  }
+
+  const filtroCrit   = document.getElementById("filtro-criterio")?.value || "";
+  const filtroArea   = document.getElementById("filtro-area")?.value || "";
+  const filtroFascia = document.getElementById("filtro-fascia")?.value || "";
+  const filtroLotti  = document.getElementById("filtro-lotti")?.value || "";
+  const filtroReg    = document.getElementById("filtro-regione")?.value || "";
+  const filtroProv   = document.getElementById("filtro-provincia")?.value || "";
+  const filtroDa     = document.getElementById("filtro-data-da")?.value || "";
+  const filtroA      = document.getElementById("filtro-data-a")?.value || "";
+
+  const mkOpts = (set, sel) => Array.from(set).sort().map(v =>
+    `<option value="${escHtml(v)}" ${sel === v ? "selected" : ""}>${escHtml(v)}</option>`
+  ).join("");
+
+  let provFiltrate = provinceSet;
+  if (filtroReg) {
+    provFiltrate = new Set();
+    for (const [sig, [prov, reg]] of Object.entries(PROVINCE_REGIONE)) {
+      if (reg === filtroReg && provinceSet.has(prov)) provFiltrate.add(prov);
+    }
+  }
+
+  return `<div class="filter-panel">
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label">Area Tematica</div>
+        <select class="filter-select" id="filtro-area" onchange="filtraArchivio()">
+          <option value="">Tutte</option>
+          <option value="Tecnologia" ${filtroArea==="Tecnologia"?"selected":""}>Tecnologia</option>
+          <option value="Arredi" ${filtroArea==="Arredi"?"selected":""}>Arredi</option>
+          <option value="Software" ${filtroArea==="Software"?"selected":""}>Software</option>
+          <option value="Formazione" ${filtroArea==="Formazione"?"selected":""}>Formazione</option>
+          <option value="Materiale Didattico" ${filtroArea==="Materiale Didattico"?"selected":""}>Materiale Didattico</option>
+          <option value="Consumabili" ${filtroArea==="Consumabili"?"selected":""}>Consumabili</option>
+          <option value="STEAM" ${filtroArea==="STEAM"?"selected":""}>STEAM</option>
+          <option value="Altro" ${filtroArea==="Altro"?"selected":""}>Altro</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Criterio Aggiudicazione</div>
+        <select class="filter-select" id="filtro-criterio" onchange="filtraArchivio()">
+          <option value="">Tutti</option>
+          ${mkOpts(criteriSet, filtroCrit)}
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Fascia Importo</div>
+        <select class="filter-select" id="filtro-fascia" onchange="filtraArchivio()">
+          <option value="">Tutte</option>
+          ${FASCE_IMPORTO.map((f, i) => `<option value="${i}" ${filtroFascia===String(i)?"selected":""}>${f[0]}</option>`).join("")}
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Numero Lotti</div>
+        <select class="filter-select" id="filtro-lotti" onchange="filtraArchivio()">
+          <option value="">Tutti</option>
+          <option value="1" ${filtroLotti==="1"?"selected":""}>Lotto unico</option>
+          <option value="2-3" ${filtroLotti==="2-3"?"selected":""}>2 - 3 lotti</option>
+          <option value="4-5" ${filtroLotti==="4-5"?"selected":""}>4 - 5 lotti</option>
+          <option value="6+" ${filtroLotti==="6+"?"selected":""}>&gt; 5 lotti</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label">Regione</div>
+        <select class="filter-select" id="filtro-regione" onchange="filtraArchivio()">
+          <option value="">Tutte</option>
+          ${mkOpts(regioniSet, filtroReg)}
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Provincia</div>
+        <select class="filter-select" id="filtro-provincia" onchange="filtraArchivio()">
+          <option value="">Tutte</option>
+          ${mkOpts(provFiltrate, filtroProv)}
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Elaborata dal</div>
+        <input type="date" class="filter-input" id="filtro-data-da" value="${filtroDa}" onchange="filtraArchivio()">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Elaborata al</div>
+        <input type="date" class="filter-input" id="filtro-data-a" value="${filtroA}" onchange="filtraArchivio()">
+      </div>
+      <div class="filter-group" style="flex:0; min-width:auto;">
+        <div class="filter-label">&nbsp;</div>
+        <button class="btn-reset-filters" onclick="resetFiltri()">Reset</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function mostraArchivioOverview() {
+  vistaArchivio = "overview";
+  const main = document.getElementById("main-area");
+
+  // Card per ogni gara filtrata
+  const cardsHtml = archivioFiltrate.map(g => {
+    const origIdx = archivioData.gare.indexOf(g);
+    const dati = archivioCache[g.id] || {};
+    const nome = (dati.nome_scuola_meccanografico || g.nome_ente).split("\u2014")[0].split(",")[0].trim();
+    const valore = dati.valore_appalto || "";
+    const importo = estraiImporto(valore);
+    const importoFmt = importo ? "\u20ac " + importo.toLocaleString("it-IT", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : null;
+    const criterio = dati.criterio_aggiudicazione || "";
+    const scadenza = dati.scadenza_procedura || "";
+    const lotti = dati.numero_lotti || "";
+    const aree = classificaAree(dati);
+    const loc = estraiLocalita(dati);
+
+    const areeTags = aree.map(a => `<span class="gara-card-area">${a}</span>`).join("");
+    const locTag = loc ? `<span class="gara-card-localita">${loc.provincia} (${loc.sigla})</span>` : "";
+    const valoreTag = importoFmt ? `<span class="gara-card-valore">${importoFmt}</span>` : "";
+    const isChecked = confrontoSelezione.includes(origIdx);
+
+    const scoreBadge = Object.keys(dati).length > 5 ? renderScoreBadge(dati, true) : "";
+
+    return `
+    <div class="gara-card" onclick="mostraDettaglioArchivio(${origIdx})">
+      <div class="gara-card-check ${isChecked ? 'checked' : ''}" onclick="event.stopPropagation(); toggleConfronto(${origIdx})" title="Seleziona per confronto">${isChecked ? '\u2713' : ''}</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        ${scoreBadge}
+        <div class="gara-card-name" style="flex:1">${escHtml(nome)}</div>
+      </div>
+      ${criterio && criterio !== NOT_FOUND ? `<div class="gara-card-field"><strong>Criterio:</strong> ${escHtml(criterio.slice(0, 60))}</div>` : ""}
+      ${scadenza && scadenza !== NOT_FOUND ? `<div class="gara-card-field"><strong>Scadenza:</strong> ${escHtml(scadenza.slice(0, 40))}</div>` : ""}
+      ${lotti && lotti !== NOT_FOUND ? `<div class="gara-card-field"><strong>Lotti:</strong> ${escHtml(lotti.slice(0, 30))}</div>` : ""}
+      <div class="gara-card-tags">
+        ${valoreTag}
+        <span class="gara-card-badge">${g.campi_compilati}/${TOTALE_CAMPI_PIPELINE} \u00b7 ${g.data_elaborazione}</span>
+        ${locTag}
+        ${areeTags}
+      </div>
+    </div>`;
+  }).join("");
+
+  main.innerHTML = `
+    <div class="page-heading">Archivio Gare</div>
+    <div class="page-sub">Tutte le gare analizzate dalla pipeline automatica.</div>
+
+    ${generaFiltriHtml()}
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+      <div class="filter-count" style="margin-bottom:0;">${archivioFiltrate.length} di ${archivioData.gare.length} gare</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-export" onclick="mostraStatistiche()">Statistiche</button>
+        <button class="btn-export" onclick="esportaExcel()">Esporta Excel</button>
+      </div>
+    </div>
+
+    ${archivioFiltrate.length > 0
+      ? `<div class="archive-grid">${cardsHtml}</div>`
+      : `<div class="archive-empty">Nessuna gara corrisponde ai filtri applicati.</div>`
+    }
+    ${confrontoSelezione.length >= 2
+      ? `<button class="btn-confronta" onclick="mostraConfronto()">Confronta ${confrontoSelezione.length} gare</button>`
+      : confrontoSelezione.length === 1
+        ? `<button class="btn-confronta" style="opacity:.5; cursor:default;">Seleziona almeno 2 gare</button>`
+        : ""
+    }`;
+}
+
+// ── SELEZIONE E CONFRONTO GARE ───────────────────
+function toggleConfronto(origIdx) {
+  const pos = confrontoSelezione.indexOf(origIdx);
+  if (pos >= 0) {
+    confrontoSelezione.splice(pos, 1);
+  } else if (confrontoSelezione.length < 3) {
+    confrontoSelezione.push(origIdx);
+  }
+  mostraArchivioOverview();
+}
+
+function mostraConfronto() {
+  if (confrontoSelezione.length < 2) return;
+  const main = document.getElementById("main-area");
+
+  const gare = confrontoSelezione.map(idx => ({
+    gara: archivioData.gare[idx],
+    dati: archivioCache[archivioData.gare[idx].id] || {},
+  }));
+
+  // Header con nomi enti
+  const nomi = gare.map(g => {
+    const nome = (g.dati.nome_scuola_meccanografico || g.gara.nome_ente).split("\u2014")[0].split(",")[0].trim();
+    return nome.length > 30 ? nome.slice(0, 30) + "..." : nome;
+  });
+
+  // Tag riassuntivi per ogni gara nell'header
+  const headerTags = gare.map(g => {
+    const importo = estraiImporto(g.dati.valore_appalto);
+    const importoFmt = importo ? "\u20ac " + importo.toLocaleString("it-IT", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "";
+    const loc = estraiLocalita(g.dati);
+    const locStr = loc ? loc.provincia : "";
+    const aree = classificaAree(g.dati);
+    return { importoFmt, locStr, aree };
+  });
+
+  // Costruisci righe della tabella
+  let rowsHtml = "";
+  for (const sez of SEZIONI_PIPELINE) {
+    // Riga intestazione sezione
+    rowsHtml += `<tr class="confronto-section"><td colspan="${gare.length + 1}">${sez.titolo}</td></tr>`;
+
+    for (const [key, label] of sez.campi) {
+      rowsHtml += `<tr><td>${label}</td>`;
+      for (const g of gare) {
+        const val = g.dati[key] || NOT_FOUND;
+        const missing = val === NOT_FOUND;
+        rowsHtml += `<td class="${missing ? 'missing-cell' : ''}">${missing ? "\u2014" : escHtml(val)}</td>`;
+      }
+      rowsHtml += `</tr>`;
+    }
+  }
+
+  const colWidth = Math.floor(70 / gare.length);
+
+  main.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="page-heading">Confronto Gare</div>
+        <div class="results-meta">${gare.length} gare selezionate</div>
+      </div>
+      <button class="btn-download" onclick="confrontoSelezione=[]; mostraArchivioOverview();">Torna all'archivio</button>
+    </div>
+
+    <table class="confronto-table">
+      <thead>
+        <tr>
+          <th style="width:30%;">Campo</th>
+          ${nomi.map((n, i) => `<th style="width:${colWidth}%;">
+            ${escHtml(n)}
+            <div style="font-weight:400; font-size:10px; margin-top:4px; opacity:.8;">
+              ${headerTags[i].importoFmt ? headerTags[i].importoFmt + ' \u00b7 ' : ''}${headerTags[i].locStr}
+              ${headerTags[i].aree.map(a => '<br>' + a).join('')}
+            </div>
+          </th>`).join("")}
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+      </tbody>
+    </table>`;
+}
+
+// ── DETTAGLIO SINGOLA GARA ───────────────────────
+async function mostraDettaglioArchivio(idx) {
+  archivioSelezionato = idx;
+  mostraArchivioLista();
+
+  const gara = archivioData.gare[idx];
+  const main = document.getElementById("main-area");
+
+  let dati = archivioCache[gara.id];
+  if (!dati) {
+    main.innerHTML = `
+      <div class="processing-card">
+        <div class="spinner"></div>
+        <div class="processing-title">Caricamento dati...</div>
+      </div>`;
+    try {
+      const resp = await fetch("data/gare/" + gara.file);
+      if (!resp.ok) throw new Error("Impossibile caricare i dati della gara");
+      dati = await resp.json();
+      archivioCache[gara.id] = dati;
+    } catch (e) {
+      main.innerHTML = `<div class="upload-wrapper"><div class="alert-error">Errore: ${escHtml(e.message)}</div></div>`;
+      return;
+    }
+  }
+
+  const compilati = Object.values(dati).filter(v => v !== NOT_FOUND).length;
+  const aree = classificaAree(dati);
+  const loc = estraiLocalita(dati);
+  const importo = estraiImporto(dati.valore_appalto);
+  const importoFmt = importo ? "\u20ac " + importo.toLocaleString("it-IT", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : null;
+
+  const sezioniHtml = SEZIONI_PIPELINE.map(sez => `
+    <div class="section-card">
+      <div class="section-header">${sez.titolo}</div>
+      <div class="section-fields">
+        ${sez.campi.map(([key, label]) => {
+          const val = dati[key] || NOT_FOUND;
+          const missing = val === NOT_FOUND;
+          return `<div class="field-row">
+            <div class="field-label">${label}</div>
+            <div class="field-value ${missing ? 'missing' : ''}">${missing ? '\u2014' : escHtml(val)}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`).join("");
+
+  const nomeEnte = (dati.nome_scuola_meccanografico || gara.nome_ente).split("\u2014")[0].trim();
+  const areeTags = aree.map(a => `<span class="gara-card-area">${a}</span>`).join(" ");
+  const locTag = loc ? `<span class="gara-card-localita">${loc.provincia} \u2014 ${loc.regione}</span>` : "";
+
+  const scoreHtml = renderScoreSection(dati);
+
+  main.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="page-heading">${escHtml(nomeEnte)}</div>
+        <div class="results-meta">
+          ${importoFmt ? `<span class="gara-card-valore" style="font-size:13px; padding:3px 10px;">${importoFmt}</span> &nbsp;` : ""}
+          <span>${compilati}/32 campi compilati</span> &nbsp;\u00b7&nbsp;
+          ${gara.data_elaborazione} &nbsp;\u00b7&nbsp;
+          ${areeTags} ${locTag}
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-approfondimento" onclick="avviaApprofondimento(${idx})">Analisi Prodotti Dettagliata</button>
+        <button class="btn-download" onclick="mostraArchivioOverview()">Torna all'archivio</button>
+      </div>
+    </div>
+    ${scoreHtml}
+    <div id="approfondimento-result" style="display:none;"></div>
+    ${sezioniHtml}`;
+}
+
+// ═══════════════════════════════════════════════════
+//  STATISTICHE (Chart.js)
+// ═══════════════════════════════════════════════════
+const CHART_COLORS = ["#334155","#0F766E","#F59E0B","#64748B","#7C3AED","#DC2626","#0891B2","#A3A3A3"];
+function cssVar(nome, fallback) { return getComputedStyle(document.documentElement).getPropertyValue(nome).trim() || fallback; }
+
+// Coordinate capoluoghi di provincia (lat, lng)
+const PROVINCE_COORDS = {
+  AG:[37.31,13.58],AL:[44.91,8.61],AN:[43.62,13.52],AO:[45.74,7.32],AP:[42.85,13.57],
+  AQ:[42.35,13.40],AR:[43.46,11.88],AT:[44.90,8.21],AV:[40.91,14.79],BA:[41.13,16.87],
+  BG:[45.69,9.67],BI:[45.56,8.05],BL:[46.14,12.22],BN:[41.13,14.78],BO:[44.49,11.34],
+  BR:[40.63,17.94],BS:[45.54,10.21],BT:[41.23,16.29],BZ:[46.50,11.35],CA:[39.22,9.12],
+  CB:[41.56,14.66],CE:[41.07,14.33],CH:[42.35,14.17],CL:[37.49,14.06],CN:[44.38,7.55],
+  CO:[45.81,9.08],CR:[45.13,10.02],CS:[39.30,16.25],CT:[37.50,15.09],CZ:[38.89,16.60],
+  EN:[37.57,14.27],FC:[44.22,12.04],FE:[44.84,11.62],FG:[41.46,15.55],FI:[43.77,11.25],
+  FM:[43.16,13.72],FR:[41.64,13.35],GE:[44.41,8.93],GO:[45.94,13.62],GR:[42.76,11.11],
+  IM:[43.89,8.04],IS:[41.59,14.23],KR:[39.08,17.13],LC:[45.85,9.39],LE:[40.35,18.17],
+  LI:[43.55,10.31],LO:[45.31,9.50],LT:[41.47,12.90],LU:[43.84,10.51],MB:[45.58,9.27],
+  MC:[43.30,13.45],ME:[38.19,15.55],MI:[45.46,9.19],MN:[45.16,10.79],MO:[44.65,10.92],
+  MS:[44.04,10.14],MT:[40.67,16.60],NA:[40.85,14.27],NO:[45.45,8.62],NU:[40.32,9.33],
+  OR:[39.91,8.59],PA:[38.12,13.36],PC:[44.83,9.50],PD:[45.41,11.88],PE:[42.46,14.21],
+  PG:[43.11,12.39],PI:[43.72,10.40],PN:[45.96,12.66],PO:[43.88,11.10],PR:[44.80,10.33],
+  PT:[43.93,10.92],PU:[43.91,12.91],PV:[45.18,9.16],PZ:[40.64,15.81],RA:[44.42,12.20],
+  RC:[38.11,15.65],RE:[44.70,10.63],RG:[36.93,14.73],RI:[42.40,12.86],RM:[41.90,12.50],
+  RN:[44.06,12.57],RO:[45.07,11.79],SA:[40.68,14.77],SI:[43.32,11.33],SO:[46.17,9.87],
+  SP:[44.11,9.82],SR:[37.07,15.29],SS:[40.73,8.56],SU:[39.50,8.86],SV:[44.31,8.48],
+  TA:[40.47,17.24],TE:[42.66,13.70],TN:[46.07,11.12],TO:[45.07,7.69],TP:[38.02,12.54],
+  TR:[42.56,12.64],TS:[45.65,13.78],TV:[45.67,12.24],UD:[46.06,13.24],VA:[45.82,8.83],
+  VB:[45.92,8.55],VC:[45.32,8.42],VE:[45.44,12.34],VI:[45.55,11.55],VR:[45.44,10.99],
+  VT:[42.42,12.11],VV:[38.68,16.10],
+};
+
+function mostraStatistiche() {
+  vistaArchivio = "statistiche";
+  const main = document.getElementById("main-area");
+  const gare = archivioFiltrate || [];
+
+  // ── KPI ──
+  const totale = gare.length;
+  const importi = gare.map(g => estraiImporto((archivioCache[g.id] || {}).valore_appalto)).filter(v => v !== null);
+  const sommaImporti = importi.reduce((a, b) => a + b, 0);
+  const mediaImporto = importi.length > 0 ? sommaImporti / importi.length : 0;
+  const regioniUniche = new Set(gare.map(g => { const l = estraiLocalita(archivioCache[g.id] || {}); return l ? l.regione : null; }).filter(Boolean));
+
+  const fmtEuro = v => "\u20ac " + Math.round(v).toLocaleString("it-IT");
+
+  // ── Dati per grafici ──
+  // 1. Gare per mese
+  const perMese = {};
+  gare.forEach(g => {
+    const m = g.data_elaborazione.slice(0, 7); // YYYY-MM
+    perMese[m] = (perMese[m] || 0) + 1;
+  });
+  const mesiOrd = Object.keys(perMese).sort();
+  const mesiLabels = mesiOrd.map(m => {
+    const [y, mo] = m.split("-");
+    return ["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"][parseInt(mo)-1] + " " + y;
+  });
+
+  // 2. Per criterio aggiudicazione
+  const perCriterio = {};
+  gare.forEach(g => {
+    const dati = archivioCache[g.id] || {};
+    const c = (dati.criterio_aggiudicazione || "").toLowerCase();
+    let label = "Non specificato";
+    if (c.includes("oepv") || c.includes("offerta economicamente")) label = "OEPV";
+    else if (c.includes("minor prezzo") || c.includes("prezzo pi")) label = "Minor prezzo";
+    else if (c && c !== NOT_FOUND.toLowerCase()) label = "Altro";
+    perCriterio[label] = (perCriterio[label] || 0) + 1;
+  });
+
+  // 3. Per area tematica
+  const perArea = {};
+  gare.forEach(g => {
+    const dati = archivioCache[g.id] || {};
+    const aree = classificaAree(dati);
+    if (aree.length === 0) { perArea["N/D"] = (perArea["N/D"] || 0) + 1; return; }
+    aree.forEach(a => { perArea[a] = (perArea[a] || 0) + 1; });
+  });
+
+  // 4. Per fascia importo
+  const perFascia = {};
+  FASCE_IMPORTO.forEach(f => perFascia[f[0]] = 0);
+  gare.forEach(g => {
+    const imp = estraiImporto((archivioCache[g.id] || {}).valore_appalto);
+    if (imp === null) return;
+    for (const [label, min, max] of FASCE_IMPORTO) {
+      if (imp >= min && imp < max) { perFascia[label]++; break; }
+    }
+  });
+
+  // 5. Per regione
+  const perRegione = {};
+  gare.forEach(g => {
+    const loc = estraiLocalita(archivioCache[g.id] || {});
+    const reg = loc ? loc.regione : "N/D";
+    perRegione[reg] = (perRegione[reg] || 0) + 1;
+  });
+  const regioniOrd = Object.entries(perRegione).sort((a, b) => b[1] - a[1]);
+
+  main.innerHTML = `
+    <div class="results-header">
+      <div>
+        <div class="page-heading">Statistiche</div>
+        <div class="results-meta">Basate su ${totale} gare ${totale < archivioData.gare.length ? "(filtrate)" : ""}</div>
+      </div>
+      <button class="btn-download" onclick="mostraArchivioOverview()">Torna all'archivio</button>
+    </div>
+
+    ${generaFiltriHtml()}
+
+    <div class="stats-summary">
+      <div class="stats-kpi">
+        <div class="stats-kpi-value">${totale}</div>
+        <div class="stats-kpi-label">Gare analizzate</div>
+      </div>
+      <div class="stats-kpi">
+        <div class="stats-kpi-value">${fmtEuro(sommaImporti)}</div>
+        <div class="stats-kpi-label">Valore totale</div>
+      </div>
+      <div class="stats-kpi">
+        <div class="stats-kpi-value">${importi.length > 0 ? fmtEuro(mediaImporto) : "N/D"}</div>
+        <div class="stats-kpi-label">Importo medio</div>
+      </div>
+      <div class="stats-kpi">
+        <div class="stats-kpi-value">${regioniUniche.size}</div>
+        <div class="stats-kpi-label">Regioni</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stats-card">
+        <div class="stats-card-title">Gare per mese</div>
+        <canvas id="chart-mese"></canvas>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-title">Criterio di aggiudicazione</div>
+        <canvas id="chart-criterio"></canvas>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-title">Aree tematiche</div>
+        <canvas id="chart-area"></canvas>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-title">Fascia importo</div>
+        <canvas id="chart-importo"></canvas>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-title">Distribuzione per regione</div>
+        <canvas id="chart-regione"></canvas>
+      </div>
+      <div class="stats-card stats-card-full">
+        <div class="stats-card-title">Mappa degli enti</div>
+        <div id="stats-map" class="map-container"></div>
+      </div>
+    </div>`;
+
+  // ── Render grafici ──
+  new Chart(document.getElementById("chart-mese"), {
+    type: "bar",
+    data: { labels: mesiLabels, datasets: [{ label: "Gare", data: mesiOrd.map(m => perMese[m]), backgroundColor: CHART_COLORS[0], borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  new Chart(document.getElementById("chart-criterio"), {
+    type: "doughnut",
+    data: { labels: Object.keys(perCriterio), datasets: [{ data: Object.values(perCriterio), backgroundColor: CHART_COLORS }] },
+    options: { plugins: { legend: { position: "bottom" } } }
+  });
+
+  const areeLabels = Object.keys(perArea).sort((a, b) => perArea[b] - perArea[a]);
+  new Chart(document.getElementById("chart-area"), {
+    type: "bar",
+    data: { labels: areeLabels, datasets: [{ label: "Gare", data: areeLabels.map(a => perArea[a]), backgroundColor: CHART_COLORS[1], borderRadius: 6 }] },
+    options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  new Chart(document.getElementById("chart-importo"), {
+    type: "bar",
+    data: { labels: FASCE_IMPORTO.map(f => f[0]), datasets: [{ label: "Gare", data: FASCE_IMPORTO.map(f => perFascia[f[0]]), backgroundColor: CHART_COLORS[2], borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  new Chart(document.getElementById("chart-regione"), {
+    type: "bar",
+    data: { labels: regioniOrd.map(r => r[0]), datasets: [{ label: "Gare", data: regioniOrd.map(r => r[1]), backgroundColor: CHART_COLORS[4], borderRadius: 6 }] },
+    options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  // ── Mappa Leaflet ──
+  const mapEl = document.getElementById("stats-map");
+  if (mapEl) {
+    const map = L.map("stats-map").setView([42.0, 12.5], 6);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 18,
+    }).addTo(map);
+
+    // Raggruppa gare per provincia
+    const gareProv = {};
+    gare.forEach(g => {
+      const dati = archivioCache[g.id] || {};
+      const loc = estraiLocalita(dati);
+      if (!loc) return;
+      if (!gareProv[loc.sigla]) gareProv[loc.sigla] = { loc, gare: [] };
+      gareProv[loc.sigla].gare.push({ g, dati });
+    });
+
+    const bounds = [];
+    for (const [sigla, info] of Object.entries(gareProv)) {
+      const coords = PROVINCE_COORDS[sigla];
+      if (!coords) continue;
+
+      const n = info.gare.length;
+      const radius = Math.max(8, Math.min(20, 8 + n * 4));
+
+      // Popup con elenco gare
+      const popupHtml = info.gare.map(({ g, dati }) => {
+        const nome = (dati.nome_scuola_meccanografico || g.nome_ente).split("\u2014")[0].split(",")[0].trim();
+        const imp = estraiImporto(dati.valore_appalto);
+        const impFmt = imp ? " \u2014 \u20ac " + Math.round(imp).toLocaleString("it-IT") : "";
+        return `<strong>${escHtml(nome.slice(0, 40))}</strong>${impFmt}`;
+      }).join("<br>");
+
+      const marker = L.circleMarker([coords[0], coords[1]], {
+        radius,
+        fillColor: cssVar("--blue-mid", "#334155"),
+        color: cssVar("--blue", "#1E293B"),
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.7,
+      }).addTo(map);
+
+      marker.bindPopup(`<div style="font-size:12px; max-width:280px;">
+        <strong style="color:${cssVar("--blue", "#1E293B")};">${info.loc.provincia} (${sigla})</strong>
+        <span style="color:#5F6368;"> \u2014 ${n} gara${n > 1 ? "e" : ""}</span>
+        <hr style="margin:6px 0; border:none; border-top:1px solid #ddd;">
+        ${popupHtml}
+      </div>`);
+
+      bounds.push([coords[0], coords[1]]);
+    }
+
+    if (bounds.length > 0) {
+      if (bounds.length === 1) map.setView(bounds[0], 10);
+      else map.fitBounds(bounds, { padding: [30, 30] });
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  EXPORT EXCEL (SheetJS)
+// ═══════════════════════════════════════════════════
+
+// Mesi italiani per parsing date
+const MESI_IT = {
+  gennaio:1, febbraio:2, marzo:3, aprile:4, maggio:5, giugno:6,
+  luglio:7, agosto:8, settembre:9, ottobre:10, novembre:11, dicembre:12
+};
+
+function normalizzaData(text) {
+  if (!text || text === NOT_FOUND) return "";
+
+  // Formato: dd/mm/yyyy o dd.mm.yyyy o dd-mm-yyyy (con eventuale ore)
+  let m = text.match(/(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})/);
+  if (m) return `${m[1].padStart(2,"0")}/${m[2].padStart(2,"0")}/${m[3]}`;
+
+  // Formato: "23 marzo 2026" (giorno mese_scritto anno)
+  m = text.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+  if (m) return `${m[1].padStart(2,"0")}/${String(MESI_IT[m[2].toLowerCase()]).padStart(2,"0")}/${m[3]}`;
+
+  // Nessuna data riconosciuta — restituisci il testo originale
+  return text;
+}
+
+// Campi data da normalizzare
+const CAMPI_DATA = ["inizio_procedura", "scadenza_procedura", "chiusura_richiesta_chiarimenti", "data_limite_consegna_beni"];
+
+function esportaExcel() {
+  if (!archivioFiltrate || archivioFiltrate.length === 0) return;
+
+  // Tutti i campi della pipeline come colonne
+  const colonne = SEZIONI_PIPELINE.flatMap(sez => sez.campi);
+
+  // Header
+  const header = colonne.map(([key, label]) => label);
+  header.unshift("Data Elaborazione");
+  header.push("Provincia", "Regione");
+
+  // Righe dati
+  const righe = archivioFiltrate.map(g => {
+    const dati = archivioCache[g.id] || {};
+    const loc = estraiLocalita(dati);
+    const riga = colonne.map(([key]) => {
+      const val = dati[key];
+      if (!val || val === NOT_FOUND) return "";
+      // Normalizza campi data
+      if (CAMPI_DATA.includes(key)) return normalizzaData(val);
+      return val;
+    });
+    riga.unshift(g.data_elaborazione);
+    riga.push(loc ? loc.provincia : "", loc ? loc.regione : "");
+    return riga;
+  });
+
+  // Crea workbook
+  const ws_data = [header, ...righe];
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+  // Larghezze colonne auto
+  ws["!cols"] = header.map((h, i) => {
+    const maxLen = Math.max(h.length, ...righe.map(r => (r[i] || "").toString().length));
+    return { wch: Math.min(Math.max(maxLen, 12), 50) };
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Gare");
+
+  // Download
+  const data = new Date().toISOString().slice(0, 10);
+  const prefisso = (CFG.company_name || CFG.app_name).replace(/[^A-Za-z0-9]+/g, "") || "Archivio";
+  XLSX.writeFile(wb, `${prefisso}_Archivio_Gare_${data}.xlsx`);
+}
+</script>
+</body>
+</html>
