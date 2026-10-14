@@ -30,7 +30,7 @@ window.APP_CONFIG = {
   password: "AnalizzaGare-2026",
 
   // Modello Claude usato dal browser (la chiave API la inserisce l'utente al login)
-  claude_model: "claude-sonnet-4-5",
+  claude_model: "claude-opus-5-5",
 
   // Chiave con cui la API key viene salvata nel browser (localStorage)
   storage_key: "ag_apikey",
