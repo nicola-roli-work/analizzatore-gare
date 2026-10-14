@@ -1,6 +1,16 @@
 {
   "gare": [
     {
+      "id": "20261010_Disciplinare-Gara_Istituto-Tecnico-Industriale-Statale-Enrico-Mattei",
+      "nome_ente": "Istituto Tecnico Industriale Statale \"Enrico Mattei\" di Castelforte Ligure - Codice Meccanografico SVTF07700N",
+      "data_elaborazione": "2026-10-14",
+      "valore_appalto": "€ 155.000,00 IVA esclusa. Lotto 1 - Infrastruttura di rete, sicurezza e alimentazione (CIG B4E8B3D1A2): € 95.000,00. Lotto 2 - Postazioni, software e strumenti per la cybersecurity (CIG B4E8B3D1B3): € 60.000,00. Oneri per la sicurezza da interferenze (DUVRI): € 1.500,00.",
+      "scadenza_procedura": "05/11/2026 ore 12:00 (prima seduta pubblica telematica il 06/11/2026 ore 10:00)",
+      "aree_tematiche": "Tecnologia, Software",
+      "campi_compilati": 32,
+      "file": "20261010_Disciplinare-Gara_Istituto-Tecnico-Industriale-Statale-Enrico-Mattei.json"
+    },
+    {
       "id": "20261007_Disciplinare-Gara_Istituto-di-Istruzione-Superiore-Galileo-Ferraris-",
       "nome_ente": "Istituto di Istruzione Superiore \"Galileo Ferraris\" di Pontelago - Codice Meccanografico BSIS09900T",
       "data_elaborazione": "2026-10-14",
@@ -21,5 +31,5 @@
       "file": "20261014_Disciplinare-Gara_IIS-L-CEREBOTANI.json"
     }
   ],
-  "ultimo_aggiornamento": "2026-10-14T17:25:40.316733"
+  "ultimo_aggiornamento": "2026-10-14T17:36:23.870578"
 }
