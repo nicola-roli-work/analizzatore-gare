@@ -1,0 +1,30 @@
+{
+  "versione": "1.0",
+  "_nota": "Configurazione dello score di fattibilita. Usata IDENTICA dallo script desktop e dalla webapp. I pesi sono relativi (vengono normalizzati). profondita_riferimento = numero medio di prodotti per sotto-categoria che vale 100/100 di profondita catalogo.",
+  "peso_copertura": 50,
+  "peso_criticita": 50,
+  "fattori_criticita": {
+    "criterio_aggiudicazione": { "peso": 15, "descrizione": "OEPV favorevole, minor prezzo sfavorevole" },
+    "penali":                  { "peso": 15, "descrizione": "Penali gravose o senza tetto massimo penalizzano" },
+    "tempi_consegna":          { "peso": 15, "descrizione": "Tempi stretti (<30 giorni) penalizzano" },
+    "requisiti_tecnici":       { "peso": 15, "descrizione": "Fatturato alto o certificazioni rare penalizzano" },
+    "complessita_consegna":    { "peso": 10, "descrizione": "Piu plessi = piu complessita logistica" },
+    "costi_partecipazione":    { "peso": 10, "descrizione": "Cauzione provvisoria + ANAC + bollo" },
+    "garanzia_obbligatoria":   { "peso": 10, "descrizione": "Garanzia oltre 36 mesi penalizza" },
+    "subappalto":              { "peso": 10, "descrizione": "Subappalto non ammesso penalizza" }
+  },
+  "fattori_copertura": {
+    "copertura_sotto_categorie": { "peso": 40, "descrizione": "Percentuale di sotto-categorie richieste presenti nel catalogo" },
+    "marchi_in_catalogo":        { "peso": 30, "descrizione": "Marchi citati dalla gara presenti nel catalogo" },
+    "profondita_catalogo":       { "peso": 20, "descrizione": "Ampiezza di gamma nelle sotto-categorie coperte" },
+    "compatibilita_importo":     { "peso": 10, "descrizione": "Compatibilita dell'importo (valore fisso neutro)" }
+  },
+  "fasce_score": {
+    "A": { "min": 80, "max": 100, "label": "Molto adatta — partecipazione raccomandata", "colore": "#2E7D32" },
+    "B": { "min": 60, "max": 79,  "label": "Buona opportunità — criticità gestibili",     "colore": "#558B2F" },
+    "C": { "min": 40, "max": 59,  "label": "Fattibile con riserve — valutare",            "colore": "#F57F17" },
+    "D": { "min": 20, "max": 39,  "label": "Criticità importanti — sconsigliata",         "colore": "#E65100" },
+    "E": { "min": 0,  "max": 19,  "label": "Non adatta al catalogo",                      "colore": "#C62828" }
+  },
+  "profondita_riferimento": 10
+}
