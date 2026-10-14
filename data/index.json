@@ -1,4 +1,15 @@
 {
-  "gare": [],
-  "ultimo_aggiornamento": ""
+  "gare": [
+    {
+      "id": "20261014_Disciplinare-Gara_IIS-L-CEREBOTANI",
+      "nome_ente": "IIS L. CEREBOTANI - Via G. Galilei 1, 25017 Lonato del Garda (BS) - C.M.: BSIS03300R - C.F.: 84001580178",
+      "data_elaborazione": "2026-10-14",
+      "valore_appalto": "Totale €19.799,00 IVA esclusa, oneri della sicurezza da interferenze €0,00. Lotto 1 - Strumenti software avanzati per progettazione, simulazione e validazione di circuiti elettronici e sistemi a microcontrollore (PROTEUS), Lab. 1 MetroPhisics Lab: €14.999,00, CIG BBB9B0DEB7, CPV 72212517-6, 48100000-9, 48460000-0. Lotto 2 - Firewall SonicWall TZ 570, Lab. 4 DigiFactory Lab: €4.800,00, CIG BBB9B0EF8A, CPV 32420000-3, 48200000-0. Affidamento \"a corpo\"; ammesse solo offerte in ribasso.",
+      "scadenza_procedura": "Disponibile sulla piattaforma di gara",
+      "aree_tematiche": "Tecnologia, Software",
+      "campi_compilati": 27,
+      "file": "20261014_Disciplinare-Gara_IIS-L-CEREBOTANI.json"
+    }
+  ],
+  "ultimo_aggiornamento": "2026-10-14T15:02:13.686527"
 }
