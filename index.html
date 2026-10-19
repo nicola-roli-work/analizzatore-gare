@@ -6,7 +6,8 @@
 <title>Analizzatore Gare</title>
 <!-- Tutta la personalizzazione (nome, colori, password, modello, logo) sta in config.js -->
 <script src="config.js"></script>
-<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="icon" href="img/favicon.png" type="image/png">
+<meta name="theme-color" content="#520C24">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -31,6 +32,7 @@
     --ok:      #2E7D32;
     --err:     #C62828;
     --light-blue: #E2E8F0; /* sfondi chiari */
+    --gold:    #D4A24C;   /* nome app nell'header */
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -79,7 +81,7 @@
     letter-spacing: .02em;
   }
   .header-title span {
-    color: var(--accent);
+    color: var(--gold);
     font-weight: 600;
   }
   .header-user {
@@ -194,7 +196,7 @@
     margin-bottom: 20px;
   }
   .login-logo img {
-    width: 80px;
+    width: 170px;
     height: auto;
   }
   .login-heading {
@@ -1273,7 +1275,8 @@ const TITOLO_INTESTAZIONE = CFG.company_name || CFG.app_name;   // intestazione 
 (function applicaConfig() {
   const c = CFG.colors || {};
   const map = { primary: "--blue", primary_dark: "--blue-dark", secondary: "--blue-mid",
-                accent: "--accent", accent_hover: "--accent-hover", light: "--light-blue" };
+                accent: "--accent", accent_hover: "--accent-hover", light: "--light-blue",
+                gold: "--gold" };
   for (const [k, v] of Object.entries(map)) if (c[k]) document.documentElement.style.setProperty(v, c[k]);
   document.title = CFG.app_name;
   document.getElementById("login-heading").textContent = CFG.app_name;
