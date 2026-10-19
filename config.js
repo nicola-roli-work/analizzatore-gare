@@ -21,9 +21,9 @@ window.APP_CONFIG = {
 
   // Logo (percorso relativo o URL). "" = nessun logo, solo testo.
   //   logo_url        -> header (consigliato: versione chiara/bianca, altezza ~32px)
-  //   logo_login_url  -> schermata di login (versione a colori, larghezza ~80px)
-  logo_url: "",
-  logo_login_url: "img/logo.svg",
+  //   logo_login_url  -> schermata di login (versione a colori, larghezza ~170px)
+  logo_url: "img/valere-logo-bianco.png",
+  logo_login_url: "img/valere-logo.png",
 
   // Password condivisa di accesso (gate semplice, lato browser: non è una
   // protezione forte). Cambiarla prima della pubblicazione.
@@ -42,13 +42,14 @@ window.APP_CONFIG = {
   // Nota a piè di pagina dei PDF scaricati dal browser
   footer_note: "Documento riservato ad uso interno",
 
-  // Colori (esadecimali). Palette neutra predefinita: sostituire con i colori aziendali.
+  // Colori (esadecimali). Palette Valere: bordeaux, rosso, oro.
   colors: {
-    primary:      "#1E293B",   // header, titoli, intestazioni
-    primary_dark: "#0F172A",   // sfondo schermata di login
-    secondary:    "#334155",   // intestazioni sezione, link, elementi attivi
-    accent:       "#0F766E",   // pulsanti principali
-    accent_hover: "#115E59",   // pulsanti principali (hover)
-    light:        "#E2E8F0",   // sfondi chiari (etichette campi, selezioni)
+    primary:      "#520C24",   // header, titoli, intestazioni
+    primary_dark: "#2A0611",   // sfondo schermata di login
+    secondary:    "#7A1F3D",   // intestazioni sezione, link, elementi attivi
+    accent:       "#E8213F",   // pulsanti principali
+    accent_hover: "#C4142F",   // pulsanti principali (hover)
+    light:        "#F4EDEF",   // sfondi chiari (etichette campi, selezioni)
+    gold:         "#E0A63A",   // nome app nell'header, dettagli
   },
 };
