@@ -1,6 +1,16 @@
 {
   "gare": [
     {
+      "id": "20261014_Disciplinare-Gara_Istituto-di-Istruzione-Superiore-Alessandro-Volta-",
+      "nome_ente": "Istituto di Istruzione Superiore \"Alessandro Volta\" di Pieve Bassa, Via Lombardia 88, 26099 Pieve Bassa (CR). Codice Meccanografico CRIS01100R (C.F. 92055667788, Codice Univoco UFD6B2)",
+      "data_elaborazione": "2026-10-23",
+      "valore_appalto": "€ 210.000,00 IVA esclusa. Oneri per la sicurezza da interferenze (DUVRI) indicati in € 2.000,00. Dettaglio per lotto: Lotto 1 – Postazioni desktop e workstation, CIG B4C5F7A2D9, € 110.000,00; Lotto 2 – Stampa, scansione e consumabili, CIG B4C5F7A2E1, € 35.000,00; Lotto 3 – Continuità elettrica e networking, CIG B4C5F7A2F2, € 25.000,00; Lotto 4 – Software gestionale e produttività, CIG B4C5F7A2G3, € 40.000,00",
+      "scadenza_procedura": "20/11/2026 ore 12:00 (termine perentorio). Prima seduta pubblica telematica: 23/11/2026 ore 10:00",
+      "aree_tematiche": "Tecnologia, Software, Consumabili",
+      "campi_compilati": 32,
+      "file": "20261014_Disciplinare-Gara_Istituto-di-Istruzione-Superiore-Alessandro-Volta-.json"
+    },
+    {
       "id": "20261013_Disciplinare-Gara_Liceo-Scientifico-Statale-Ettore-Majorana-di-Borgo",
       "nome_ente": "Liceo Scientifico Statale \"Ettore Majorana\" di Borgo San Felice - Codice Meccanografico MOPS06600X",
       "data_elaborazione": "2026-10-22",
@@ -41,5 +51,5 @@
       "file": "20261014_Disciplinare-Gara_IIS-L-CEREBOTANI.json"
     }
   ],
-  "ultimo_aggiornamento": "2026-10-22T18:03:15.216305"
+  "ultimo_aggiornamento": "2026-10-23T18:40:25.849603"
 }
